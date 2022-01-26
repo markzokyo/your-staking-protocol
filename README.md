@@ -1,2 +1,2 @@
-# your-staking
-Staking functionality for YOUR
+# Your token staking
+Staking rust contract

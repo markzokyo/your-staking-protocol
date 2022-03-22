@@ -5,8 +5,7 @@ import {PublicKey} from '@solana/web3.js';
  */
 export class Pubkeys {
   static yourStakingProgramId = new PublicKey(
-    (process.env.SOLANA_PROGRAM_ID as string) ??
-      (process.env.REACT_APP_SOLANA_PROGRAM_ID as string)
+    (process.env.REACT_APP_SOLANA_PROGRAM_ID as string) ?? 'AVZLpJUVMSUYnwDVrW8sYurvZ8YuVKsimy1T4mSzttX5'
   );
 
   static splAssociatedTokenAccountProgramId = new PublicKey(

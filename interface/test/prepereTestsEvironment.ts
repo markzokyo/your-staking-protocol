@@ -7,19 +7,16 @@ import {findAssociatedTokenAddress} from "../src/utils";
 import BN from "bn.js";
 
 const adminAccount: Keypair = Keypair.generate();
-const walletAccount: Keypair = Keypair.generate();
 
 const yourPoolStorageAccount: Keypair = Keypair.generate();
 const yourStakingVault: Keypair = Keypair.generate();
 const yourRewardsVault: Keypair = Keypair.generate();
 
+const walletAccount: Keypair = Keypair.generate();
+
 const rewardDurationInDays: number = 1 / 86400;
 const yourDecimals = 9;
 const rewardTokenDecimals = 9;
-
-/** wallets for claim rewards **/
-const wallet1Account: Keypair = Keypair.generate();
-const wallet2Account: Keypair = Keypair.generate();
 
 async function setupEnvironment() {
     Constants.yourDecimals = yourDecimals;
@@ -44,12 +41,12 @@ async function setupEnvironment() {
     const rewardTokenMint = yourTokenMint;
     Pubkeys.rewardsMintPubkey = rewardTokenMint.publicKey;
 
-    const funderRewardTokenData = await findAssociatedTokenAddress(
+    const adminRewardTokenData = await findAssociatedTokenAddress(
         adminAccount.publicKey,
         Pubkeys.rewardsMintPubkey
     );
     const funderRewardAtaInfo = await connection.getAccountInfo(
-        funderRewardTokenData
+        adminRewardTokenData
     );
     const doesRewardsAtaExist = funderRewardAtaInfo?.owner !== undefined;
 
@@ -59,7 +56,7 @@ async function setupEnvironment() {
                 ASSOCIATED_TOKEN_PROGRAM_ID,
                 TOKEN_PROGRAM_ID,
                 Pubkeys.rewardsMintPubkey,
-                funderRewardTokenData,
+                adminRewardTokenData,
                 adminAccount.publicKey,
                 adminAccount.publicKey
             );
@@ -76,7 +73,7 @@ async function setupEnvironment() {
         .mul(new BN(Constants.toYourRaw))
         .toArray('le', 8);
     await rewardTokenMint.mintTo(
-        funderRewardTokenData,
+        adminRewardTokenData,
         adminAccount.publicKey,
         [],
         new u64(rewardTokensToMintRaw)

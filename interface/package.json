@@ -3,12 +3,7 @@
 	"version": "1.0.0",
 	"description": "package to interface with your-staking blockchain",
 	"scripts": {
-		"build": "rimraf ./dist && tsc",
-		"postbuild": "node ./scripts/postbuild.js",
-		"test": "jest",
-		"lint": "gts lint",
-		"dev": "npm run compile -- --watch",
-		"fix": "gts fix"
+		"test": "jest --detectOpenHandles"
 	},
 	"author": "",
 	"license": "ISC",

@@ -11,7 +11,7 @@ import BN from 'bn.js';
 import { ConnectionService } from '../config';
 import { Pubkeys } from '../constants';
 import { YourStakingInstructions, YourPoolData } from '../models';
-import {findAssociatedTokenAddress, getPoolSignerPdaNonce} from '../utils';
+import { findAssociatedTokenAddress, getPoolSignerPdaNonce } from '../utils';
 
 export async function createInitializePoolTransaction(
     poolOwnerWallet: PublicKey,
@@ -71,20 +71,18 @@ export async function createInitializePoolTransaction(
         newAccountPubkey: yourPoolStorageAccount.publicKey,
         programId: Pubkeys.yourStakingProgramId,
     });
-    
+
     const balance = await connection.getBalance(poolOwnerWallet);
-    if (balance < rentPrice)
-    throw new Error(
-        `Need at least ${rentPrice / LAMPORTS_PER_SOL
-    } SOL for contest account rent`
-    );
-    
+    if (balance < rentPrice) {
+        throw new Error(`Need at least ${rentPrice / LAMPORTS_PER_SOL} SOL for contest account rent`);
+    }
+
     const funderWallet = poolOwnerWallet; // admin account
     const rewardsATAPubkey = await findAssociatedTokenAddress(
         funderWallet,
         Pubkeys.rewardsMintPubkey
-        );
-        
+    );
+
     const pool_nonce = await getPoolSignerPdaNonce();
     const initPoolStorageAccountIx = new TransactionInstruction({
         programId: Pubkeys.yourStakingProgramId,
@@ -138,7 +136,7 @@ export async function createInitializePoolTransaction(
         data: Buffer.from([
             YourStakingInstructions.InitializeYourPool,
             ...new BN(rewardDuration).toArray('le', 8), ...new BN(pool_nonce.valueOf()).toArray('le', 1), ... new BN
-            (fundPoolAmount).toArray('le', 8)
+                (fundPoolAmount).toArray('le', 8)
         ])
     });
 
@@ -152,7 +150,7 @@ export async function createInitializePoolTransaction(
     );
 
     transaction.recentBlockhash = (
-        await connection.getRecentBlockhash()
+        await connection.getLatestBlockhash()
     ).blockhash;
     transaction.feePayer = poolOwnerWallet;
 

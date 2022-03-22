@@ -20,7 +20,6 @@ export class YourPoolData {
     rewardPerTokenStored: BN;
     userStakeCount: BN;
     pdaNonce: number;
-    funders: FundersData;
     rewardDurationEnd: BN;
 
   constructor(args: {
@@ -36,7 +35,6 @@ export class YourPoolData {
     rewardPerTokenStored: BN;
     userStakeCount: BN;
     pdaNonce: number;
-    funders: FundersData;
     rewardDurationEnd: BN;
   }) {
     this.accountType = args.accountType;
@@ -51,7 +49,6 @@ export class YourPoolData {
     this.rewardPerTokenStored = args.rewardPerTokenStored;
     this.userStakeCount = args.userStakeCount;
     this.pdaNonce = args.pdaNonce;
-    this.funders = args.funders;
     this.rewardDurationEnd = args.rewardDurationEnd;
   }
 
@@ -103,9 +100,6 @@ export class YourPoolData {
     return this.pdaNonce;
   }
 
-  getFundersArray(): FundersData {
-    return this.funders;
-  }
 
   getRewardDurationEnd(): number {
     return this.rewardDurationEnd.toNumber();
@@ -127,41 +121,10 @@ export class YourPoolData {
     );
   }
 }
-export class FundersData {
-    funder1: StringPublicKey;
-    funder2: StringPublicKey;
-    funder3: StringPublicKey;
-    funder4: StringPublicKey;
-    funder5: StringPublicKey;
-    constructor(args: {
-        funder1: StringPublicKey;
-        funder2: StringPublicKey;
-        funder3: StringPublicKey;
-        funder4: StringPublicKey;
-        funder5: StringPublicKey;
-    }) {
-      this.funder1 = args.funder1;
-      this.funder2 = args.funder2;
-      this.funder3 = args.funder3;
-      this.funder4 = args.funder4;
-      this.funder5 = args.funder5;
-    }
-  }
+
 export const YOUR_POOL_STORAGE_TOTAL_BYTES = 374;
 
 export const YOUR_POOL_DATA_ON_CHAIN_SCHEMA = new Map<any, any>([
-    [
-        FundersData, {
-            kind: 'struct',
-            fields: [
-                ['funder1', 'pubkeyAsString'],
-                ['funder2', 'pubkeyAsString'],
-                ['funder3', 'pubkeyAsString'],
-                ['funder4', 'pubkeyAsString'],
-                ['funder5', 'pubkeyAsString'],
-            ]
-        }
-    ],
   [
     YourPoolData,
     {
@@ -179,7 +142,6 @@ export const YOUR_POOL_DATA_ON_CHAIN_SCHEMA = new Map<any, any>([
         ['rewardsPerTokenStored', 'u128'],
         ['userStakeCount', 'u32'],
         ['pdaNonce', 'u8'],
-        ['funders', FundersData],
         ['rewardDurationEnd', 'u64'],
       ],
     },

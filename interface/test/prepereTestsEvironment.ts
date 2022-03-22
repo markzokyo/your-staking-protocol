@@ -5,9 +5,6 @@ import {ConnectionService} from "../src/config";
 import {ASSOCIATED_TOKEN_PROGRAM_ID, Token, TOKEN_PROGRAM_ID, u64} from '@solana/spl-token';
 import {findAssociatedTokenAddress} from "../src/utils";
 import BN from "bn.js";
-import {
-    createInitializePoolTransaction, createUserTransaction
-} from "../src/transactions";
 
 const adminAccount: Keypair = getAdminAccount();
 const walletAccount: Keypair = Keypair.generate();
@@ -28,6 +25,8 @@ async function setupEnvironment() {
 
     const connection = ConnectionService.getConnection();
 
+    await requestAirdrop(adminAccount.publicKey);
+
     const yourTokenMint = await Token.createMint(
         connection,
         adminAccount,
@@ -36,22 +35,21 @@ async function setupEnvironment() {
         yourDecimals,
         TOKEN_PROGRAM_ID
     );
+    console.log("yourTokenMintPubkey", yourTokenMint.publicKey.toString());
     Pubkeys.stakingMintPubkey = yourTokenMint.publicKey;
     Pubkeys.yourTokenMintPubkey = yourTokenMint.publicKey;
 
-    const rewardTokenMint = await Token.createMint(
-        connection,
-        adminAccount,
-        adminAccount.publicKey,
-        null,
-        rewardTokenDecimals,
-        TOKEN_PROGRAM_ID
-    );
+    const rewardTokenMint = yourTokenMint;
+    // const rewardTokenMint = await Token.createMint(
+    //     connection,
+    //     adminAccount,
+    //     adminAccount.publicKey,
+    //     null,
+    //     rewardTokenDecimals,
+    //     TOKEN_PROGRAM_ID
+    // );
+    console.log("rewardsMintPubkey", rewardTokenMint.publicKey.toString());
     Pubkeys.rewardsMintPubkey = rewardTokenMint.publicKey;
-
-    yourPoolStorageAccount = Keypair.generate();
-    yourStakingVault = Keypair.generate();
-    yourRewardsVault = Keypair.generate();
 
     const funderRewardTokenData = await findAssociatedTokenAddress(
         adminAccount.publicKey,
@@ -91,7 +89,9 @@ async function setupEnvironment() {
         new u64(rewardTokensToMintRaw)
     );
 
-    await requestAirdrop(adminAccount.publicKey);
+    yourPoolStorageAccount = Keypair.generate();
+    yourStakingVault = Keypair.generate();
+    yourRewardsVault = Keypair.generate();
     Pubkeys.yourPoolStoragePubkey = yourPoolStorageAccount.publicKey;
     Pubkeys.yourStakingVaultPubkey = yourStakingVault.publicKey;
     Pubkeys.yourRewardsVaultPubkey = yourRewardsVault.publicKey;

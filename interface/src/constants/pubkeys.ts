@@ -14,26 +14,26 @@ export class Pubkeys {
   );
 
   static yourTokenMintPubkey = new PublicKey(
-    'HfYFjMKNZygfMC8LsQ8LtpPsPxEJoXJx4M6tqi75Hajo'
+    'AZ2rxXUmnffG5AjLSfQYYhXCJYEaBFFpxqHBL8PmWxru'
   );
 
   static stakingMintPubkey = new PublicKey(
-    'HfYFjMKNZygfMC8LsQ8LtpPsPxEJoXJx4M6tqi75Hajo'
+    'AZ2rxXUmnffG5AjLSfQYYhXCJYEaBFFpxqHBL8PmWxru'
   );
 
   static rewardsMintPubkey = new PublicKey(
-    'HfYFjMKNZygfMC8LsQ8LtpPsPxEJoXJx4M6tqi75Hajo'
+    'AZ2rxXUmnffG5AjLSfQYYhXCJYEaBFFpxqHBL8PmWxru'
   );
 
   static yourPoolStoragePubkey = new PublicKey(
-    'HfYFjMKNZygfMC8LsQ8LtpPsPxEJoXJx4M6tqi75Hajo'
+    'AZ2rxXUmnffG5AjLSfQYYhXCJYEaBFFpxqHBL8PmWxru'
   );
 
   static yourStakingVaultPubkey = new PublicKey(
-    'HfYFjMKNZygfMC8LsQ8LtpPsPxEJoXJx4M6tqi75Hajo'
+    'AZ2rxXUmnffG5AjLSfQYYhXCJYEaBFFpxqHBL8PmWxru'
   );
 
   static yourRewardsVaultPubkey = new PublicKey(
-    'HfYFjMKNZygfMC8LsQ8LtpPsPxEJoXJx4M6tqi75Hajo'
+    'AZ2rxXUmnffG5AjLSfQYYhXCJYEaBFFpxqHBL8PmWxru'
   );
 }

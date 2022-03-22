@@ -8,7 +8,7 @@ export class Constants {
 
   static toYourRaw = Math.pow(10, Constants.yourDecimals);
 
-  static maxYourSupply = new BN(1000_000_000).mul(new BN(Constants.toYourRaw));
+  static maxYourSupply = new BN(1_000_000_000).mul(new BN(Constants.toYourRaw));
 
   static rewardTokenDecimals = 9;
 

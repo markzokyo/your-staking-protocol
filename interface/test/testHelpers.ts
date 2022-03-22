@@ -23,3 +23,11 @@ export function timeout(ms): Promise<void> {
 export function getAdminAccount(): Keypair {
   return getKeyPair('../admin-keypair.json');
 }
+
+export function getTokenAccount(): Keypair {
+  return getKeyPair('../mock-token-keypair.json');
+}
+
+export function getUserAccount(): Keypair {
+  return getKeyPair('../mock-user-keypair.json');
+}

@@ -10,7 +10,7 @@ import {
 import BN from 'bn.js';
 import { ConnectionService } from '../config';
 import { Pubkeys } from '../constants';
-import { YourStakingInstructions } from '../models';
+import { YourStakingInstructions, YourPoolData } from '../models';
 import {findAssociatedTokenAddress, getPoolSignerPdaNonce} from '../utils';
 
 export async function createInitializePoolTransaction(
@@ -22,12 +22,11 @@ export async function createInitializePoolTransaction(
     fundPoolAmount: number
 ): Promise<Transaction> {
     const connection = ConnectionService.getConnection();
-    const poolStorageBytes = 142;
     const rewardDuration = rewardDurationInDays * 86400;
     console.log('Pool Storage Pubkey: ', yourPoolStorageAccount.publicKey.toString());
     console.log('Staking Vault Pubkey: ', yourStakingVault.publicKey.toString());
     console.log('Rewards Vault Pubkey: ', yourRewardsVault.publicKey.toString());
-    const newAccountKeypair = Keypair.generate();
+
     const createStakingVaultIx = SystemProgram.createAccount({
         space: AccountLayout.span,
         lamports: await connection.getMinimumBalanceForRentExemption(
@@ -62,7 +61,8 @@ export async function createInitializePoolTransaction(
         yourRewardsVault.publicKey,
         poolOwnerWallet
     );
-    const pool_nonce = await getPoolSignerPdaNonce();
+
+    const poolStorageBytes = 142;
     const rentPrice = await connection.getMinimumBalanceForRentExemption(
         poolStorageBytes,
         'confirmed'
@@ -74,20 +74,21 @@ export async function createInitializePoolTransaction(
         newAccountPubkey: yourPoolStorageAccount.publicKey,
         programId: Pubkeys.yourStakingProgramId,
     });
-
+    
     const balance = await connection.getBalance(poolOwnerWallet);
     if (balance < rentPrice)
-        throw new Error(
-            `Need at least ${rentPrice / LAMPORTS_PER_SOL
-            } SOL for contest account rent`
-        );
-
+    throw new Error(
+        `Need at least ${rentPrice / LAMPORTS_PER_SOL
+    } SOL for contest account rent`
+    );
+    
     const funderWallet = poolOwnerWallet; // admin account
     const rewardsATAPubkey = await findAssociatedTokenAddress(
         funderWallet,
         Pubkeys.rewardsMintPubkey
-    );
-
+        );
+        
+    const pool_nonce = await getPoolSignerPdaNonce();
     const initPoolStorageAccountIx = new TransactionInstruction({
         programId: Pubkeys.yourStakingProgramId,
         keys: [

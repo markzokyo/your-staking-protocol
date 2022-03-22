@@ -1,8 +1,8 @@
 import { Keypair, sendAndConfirmTransaction } from '@solana/web3.js';
 
 import { ConnectionService, SolanaNet } from '../src/config';
-import { createInitializePoolTransaction } from './transactions';
-import { Pubkeys } from './constants';
+import { createInitializePoolTransaction, createUpdateRatesTransaction } from './transactions';
+import { Pubkeys, Constants } from './constants';
 import { getKeyPair } from '../scripts/get-public-key';
 
 export function getProgramAccount(): Keypair {
@@ -39,25 +39,29 @@ const yourPoolStorageAccount: Keypair = getYourPoolStorageAccount();
 const yourStakingVault: Keypair = getYourStakingVault();
 const yourRewardsVault: Keypair = getYourRewardsVault();
 
-const rewardDurationInDays: number = 1 / 86400;
+ConnectionService.setNet(SolanaNet.DEVNET);
+const connection = ConnectionService.getConnection();
 
-let main = async () => {
-
+let initialize_pool = async (reward_duration: number, reward_pool: number) => {
   const initializePoolTx = await createInitializePoolTransaction(
     adminAccount.publicKey,
     yourPoolStorageAccount,
     yourStakingVault,
     yourRewardsVault,
-    rewardDurationInDays,
-    1
+    reward_duration,
+    reward_pool * Constants.toYourRaw
   );
-  const connection = ConnectionService.getConnection();
   await sendAndConfirmTransaction(connection, initializePoolTx, [
     adminAccount,
     yourPoolStorageAccount,
     yourStakingVault,
     yourRewardsVault,
   ]);
+}
+
+let change_rates = async (rewards_per_slot: number, max_reward_rate: number, min_reward_rate: number) => {
+  const createUpdateRatesTx = await createUpdateRatesTransaction(adminAccount.publicKey, rewards_per_slot, max_reward_rate, min_reward_rate);
+  await sendAndConfirmTransaction(connection, createUpdateRatesTx, [adminAccount]);
 }
 
 if (require.main === module) {
@@ -69,13 +73,39 @@ if (require.main === module) {
   Pubkeys.yourStakingVaultPubkey = yourStakingVault.publicKey;
   Pubkeys.yourRewardsVaultPubkey = yourRewardsVault.publicKey;
 
-  ConnectionService.setNet(SolanaNet.LOCALNET);
+  switch( process.argv[2] ) {
+    case "initialize_pool": {
+      if (process.argv.length < 4) {
+        throw "signature mismatch; initialize_pool(reward_duration: number, reward_pool: number)";
+      }
 
-  main()
-  .then(
-    _ => console.info("Successfully initialized pool")
-  )
-  .catch(
-    reason => console.error(reason)
-  );
+      initialize_pool(Number.parseInt(process.argv[3]), Number.parseInt(process.argv[4]))
+      .then(
+        _ => console.info("Successfully initialized pool")
+      )
+      .catch(
+        reason => console.error(reason)
+      );
+
+      break;
+    }
+    case "change_rates": {
+      if (process.argv.length < 5) {
+        throw "signature mismatch; change_rates(rewards_per_slot: number, max_reward_rate: number, min_reward_rate: number)";
+      }
+
+      change_rates(Number.parseInt(process.argv[3]), Number.parseInt(process.argv[4]), Number.parseInt(process.argv[5]))
+      .then(
+        _ => console.info("Successfully changed rates")
+      )
+      .catch(
+        reason => console.error(reason)
+      );
+
+      break;
+    }
+    default: {
+      throw "unknown command";
+    }
+  }
 }

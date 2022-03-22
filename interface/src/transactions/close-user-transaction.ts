@@ -43,7 +43,7 @@ export async function closeUserTransaction(
     });
     const closeUserTx = new Transaction().add(closeUserIx);
     closeUserTx.recentBlockhash = (
-        await connection.getRecentBlockhash()
+        await connection.getLatestBlockhash()
     ).blockhash;
     closeUserTx.feePayer = userWallet;
 

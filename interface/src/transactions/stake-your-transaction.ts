@@ -65,7 +65,7 @@ export async function stakeYourTransaction(
     });
     const stakeYourTx = new Transaction().add(stakeYourIx);
     stakeYourTx.recentBlockhash = (
-        await connection.getRecentBlockhash()
+        await connection.getLatestBlockhash()
     ).blockhash;
     stakeYourTx.feePayer = userWallet;
 

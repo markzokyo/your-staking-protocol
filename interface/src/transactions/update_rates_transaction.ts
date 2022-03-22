@@ -37,7 +37,7 @@ export async function createUpdateRatesTransaction(
     });
     const createUserTx = new Transaction().add(createUserIx);
     createUserTx.recentBlockhash = (
-        await connection.getRecentBlockhash()
+        await connection.getLatestBlockhash()
     ).blockhash;
     createUserTx.feePayer = poolOwnerPubkey;
 

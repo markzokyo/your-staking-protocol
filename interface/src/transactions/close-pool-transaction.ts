@@ -118,7 +118,7 @@ export async function closePoolTransaction(
     closePoolIxs.push(closePoolIx);
     const closePoolTx = new Transaction().add(...closePoolIxs);
     closePoolTx.recentBlockhash = (
-        await connection.getRecentBlockhash()
+        await connection.getLatestBlockhash()
     ).blockhash;
     closePoolTx.feePayer = poolOwnerWallet;
 

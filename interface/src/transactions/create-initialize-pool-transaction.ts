@@ -22,7 +22,6 @@ export async function createInitializePoolTransaction(
     fundPoolAmount: number
 ): Promise<Transaction> {
     const connection = ConnectionService.getConnection();
-    const rewardDuration = rewardDurationInDays * 86400;
 
     const createStakingVaultIx = SystemProgram.createAccount({
         space: AccountLayout.span,
@@ -135,7 +134,7 @@ export async function createInitializePoolTransaction(
         ],
         data: Buffer.from([
             YourStakingInstructions.InitializeYourPool,
-            ...new BN(rewardDuration).toArray('le', 8), ...new BN(pool_nonce.valueOf()).toArray('le', 1), ... new BN
+            ...new BN(rewardDurationInDays).toArray('le', 8), ...new BN(pool_nonce.valueOf()).toArray('le', 1), ... new BN
                 (fundPoolAmount).toArray('le', 8)
         ])
     });

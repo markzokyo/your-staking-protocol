@@ -51,7 +51,7 @@ export async function createUserTransaction(
     });
     const createUserTx = new Transaction().add(createUserIx);
     createUserTx.recentBlockhash = (
-        await connection.getRecentBlockhash()
+        await connection.getLatestBlockhash()
     ).blockhash;
     createUserTx.feePayer = userWallet;
 

@@ -23,7 +23,7 @@ class NetConfig {
 }
 
 class MainNetConfig extends NetConfig {
-  static readonly connectionString = '';
+  static readonly connectionString = 'https://api.testnet.solana.com';
   static readonly commitment = 'processed' as Commitment;
 
   constructor() {
@@ -32,7 +32,7 @@ class MainNetConfig extends NetConfig {
 }
 
 class DevNetConfig extends NetConfig {
-  static readonly connectionString = '';
+  static readonly connectionString = 'https://api.devnet.solana.com';
   static readonly commitment = 'processed' as Commitment;
 
   constructor() {

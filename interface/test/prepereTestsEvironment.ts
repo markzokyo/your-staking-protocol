@@ -1,4 +1,4 @@
-import {getAdminAccount, requestAirdrop} from "./testHelpers";
+import {requestAirdrop} from "./testHelpers";
 import {Keypair, sendAndConfirmTransaction, Transaction} from "@solana/web3.js";
 import {Constants, Pubkeys} from "../src/constants";
 import {ConnectionService} from "../src/config";
@@ -6,11 +6,13 @@ import {ASSOCIATED_TOKEN_PROGRAM_ID, Token, TOKEN_PROGRAM_ID, u64} from '@solana
 import {findAssociatedTokenAddress} from "../src/utils";
 import BN from "bn.js";
 
-const adminAccount: Keypair = getAdminAccount();
+const adminAccount: Keypair = Keypair.generate();
 const walletAccount: Keypair = Keypair.generate();
-let yourPoolStorageAccount: Keypair;
-let yourStakingVault: Keypair;
-let yourRewardsVault: Keypair;
+
+const yourPoolStorageAccount: Keypair = Keypair.generate();
+const yourStakingVault: Keypair = Keypair.generate();
+const yourRewardsVault: Keypair = Keypair.generate();
+
 const rewardDurationInDays: number = 1 / 86400;
 const yourDecimals = 9;
 const rewardTokenDecimals = 9;
@@ -35,20 +37,11 @@ async function setupEnvironment() {
         yourDecimals,
         TOKEN_PROGRAM_ID
     );
-    console.log("yourTokenMintPubkey", yourTokenMint.publicKey.toString());
+
     Pubkeys.stakingMintPubkey = yourTokenMint.publicKey;
     Pubkeys.yourTokenMintPubkey = yourTokenMint.publicKey;
 
     const rewardTokenMint = yourTokenMint;
-    // const rewardTokenMint = await Token.createMint(
-    //     connection,
-    //     adminAccount,
-    //     adminAccount.publicKey,
-    //     null,
-    //     rewardTokenDecimals,
-    //     TOKEN_PROGRAM_ID
-    // );
-    console.log("rewardsMintPubkey", rewardTokenMint.publicKey.toString());
     Pubkeys.rewardsMintPubkey = rewardTokenMint.publicKey;
 
     const funderRewardTokenData = await findAssociatedTokenAddress(
@@ -89,12 +82,6 @@ async function setupEnvironment() {
         new u64(rewardTokensToMintRaw)
     );
 
-    yourPoolStorageAccount = Keypair.generate();
-    yourStakingVault = Keypair.generate();
-    yourRewardsVault = Keypair.generate();
-    Pubkeys.yourPoolStoragePubkey = yourPoolStorageAccount.publicKey;
-    Pubkeys.yourStakingVaultPubkey = yourStakingVault.publicKey;
-    Pubkeys.yourRewardsVaultPubkey = yourRewardsVault.publicKey;
 
     await requestAirdrop(walletAccount.publicKey);
 
@@ -129,6 +116,10 @@ async function setupEnvironment() {
         [],
         new u64(yourTokensToMintRaw)
     );
+
+    Pubkeys.yourPoolStoragePubkey = yourPoolStorageAccount.publicKey;
+    Pubkeys.yourStakingVaultPubkey = yourStakingVault.publicKey;
+    Pubkeys.yourRewardsVaultPubkey = yourRewardsVault.publicKey;
 }
 
 export {

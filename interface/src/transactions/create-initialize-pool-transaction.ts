@@ -23,9 +23,6 @@ export async function createInitializePoolTransaction(
 ): Promise<Transaction> {
     const connection = ConnectionService.getConnection();
     const rewardDuration = rewardDurationInDays * 86400;
-    console.log('Pool Storage Pubkey: ', yourPoolStorageAccount.publicKey.toString());
-    console.log('Staking Vault Pubkey: ', yourStakingVault.publicKey.toString());
-    console.log('Rewards Vault Pubkey: ', yourRewardsVault.publicKey.toString());
 
     const createStakingVaultIx = SystemProgram.createAccount({
         space: AccountLayout.span,

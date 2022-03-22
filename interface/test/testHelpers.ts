@@ -31,3 +31,13 @@ export function getTokenAccount(): Keypair {
 export function getUserAccount(): Keypair {
   return getKeyPair('../mock-user-keypair.json');
 }
+
+export function getYourPoolStorageAccount(): Keypair {
+  return getKeyPair('../pool-storage-keypair.json');
+}
+export function getYourStakingVault(): Keypair {
+  return getKeyPair('../staking-vault-keypair.json');
+}
+export function getYourRewardsVault(): Keypair {
+  return getKeyPair('../reward-vault-keypair.json');
+}

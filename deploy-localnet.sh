@@ -19,6 +19,7 @@ do
 done
 
 solana config set --url $SOLANA_URL
+solana config set --keypair $(pwd)/admin-keypair.json
 
 echo "KEY_GEN"
 ADMIN_KEYPAIR_FILE=admin-keypair.json

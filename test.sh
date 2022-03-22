@@ -1,11 +1,10 @@
 #!/bin/bash
 set -e
 
-echo "SETUP ENVIRONMENT"
+./deploy-localnet.sh &&
+./create_mock_token.sh &&
+./setup_test_env.sh
 
-echo "DONE"
-
-./deploy-localnet.sh
 cd interface
 npm i
 npm run test -- --runInBand

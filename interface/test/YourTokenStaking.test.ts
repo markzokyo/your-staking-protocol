@@ -22,8 +22,9 @@ import {finalUnstakeYourTransaction} from "../src/transactions/final-unstake-you
 import {createUpdateRatesTransaction} from "../src/transactions/update_rates_transaction";
 import {getUserStorageAccountWithNonce} from "../src/utils";
 import {Pubkeys} from "../src/constants";
-import {YourStakingInstructions} from "../src/models";
+import {YourStakingInstructions, getUserPendingRewards} from "../src/models";
 import BN from "bn.js";
+import { Console } from "console";
 
 setupTest();
 
@@ -72,6 +73,11 @@ describe('Your Token Staking Tests', () => {
             amountToStake
         );
         await sendAndConfirmTransaction(connection, stakeYourTx, [walletAccount]);
+    })
+
+    test('List Rewards', async () => {
+        const rewards = await getUserPendingRewards(walletAccount.publicKey);
+        console.log(rewards);
     })
 
     test('Claim Rewards', async () => {

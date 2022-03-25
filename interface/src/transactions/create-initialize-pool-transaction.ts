@@ -58,7 +58,7 @@ export async function createInitializePoolTransaction(
         poolOwnerWallet
     );
 
-    const poolStorageBytes = 142;
+    const poolStorageBytes = 126;
     const rentPrice = await connection.getMinimumBalanceForRentExemption(
         poolStorageBytes,
         'confirmed'

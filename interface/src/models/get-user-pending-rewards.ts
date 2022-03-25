@@ -19,9 +19,10 @@ export async function getUserPendingRewards(userWallet: PublicKey): Promise<numb
         return 0;
     }
     let totalTokensStakedRaw = await getStakingVaultBalanceRaw();
-    let lastApplicableTime = Math.min(Math.floor(Date.now() / 1000), yourPoolData.rewardDurationEnd.toNumber());
-    let timeElasped = new BN(lastApplicableTime - yourPoolData.totalStakeLastUpdateTime.toNumber());
-    let currentRewardPerToken = yourPoolData.rewardPerTokenStored.add(timeElasped.mul(yourPoolData.rewardRate).mul(U64_MAX).div(new BN(totalTokensStakedRaw)));
-    let userPendingRewards = userData.balanceStaked.mul(currentRewardPerToken.sub(userData.rewardsPerTokenCompleted).div(U64_MAX).add(userData.rewardPerTokenPending)).toNumber();
-    return userPendingRewards;
+    // let lastApplicableTime = Math.min(Math.floor(Date.now() / 1000), yourPoolData.rewardDurationEnd.toNumber());
+    // let timeElasped = new BN(lastApplicableTime - yourPoolData.totalStakeLastUpdateTime.toNumber());
+    // let currentRewardPerToken = yourPoolData.rewardPerTokenStored.add(timeElasped.mul(yourPoolData.rewardRate).mul(U64_MAX).div(new BN(totalTokensStakedRaw)));
+    // let userPendingRewards = userData.balanceStaked.mul(currentRewardPerToken.sub(userData.rewardsPerTokenCompleted).div(U64_MAX).add(userData.rewardPerTokenPending)).toNumber();
+    
+    return totalTokensStakedRaw.toNumber();
 }

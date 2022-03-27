@@ -85,7 +85,6 @@ export class YourPoolData {
   }
 
   static fromBuffer(buffer: Buffer): YourPoolData {
-    console.log("buffer", buffer);
     extendBorsh();
     return deserializeUnchecked(
       YOUR_POOL_DATA_ON_CHAIN_SCHEMA,
@@ -117,8 +116,8 @@ export const YOUR_POOL_DATA_ON_CHAIN_SCHEMA = new Map<any, any>([
         ['maxRewardRate', 'u64'],
         ['minRewardRate', 'u64'],
         
-        ['weightedEpochId', 'i64'],
-        ['totalWeightedStake', 'f64'],
+        ['weightedEpochId', 'u64'],
+        ['totalWeightedStake', 'u64'],
       ],
     },
   ],

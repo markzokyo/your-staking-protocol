@@ -17,5 +17,4 @@ export function getKeyPair(pathToPrivateKeyFile: string): Keypair {
 
 if (require.main === module) {
   const programPublicKey = getPublicKey(process.argv[2]);
-  console.log(programPublicKey.toString());
 }

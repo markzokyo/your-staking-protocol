@@ -10,7 +10,7 @@ export async function getUserPendingRewards(userWallet: PublicKey): Promise<numb
     const U64_MAX = new BN("18446744073709551615", 10);
     let yourPoolData = await YourPoolData.fromAccount(Pubkeys.yourPoolStoragePubkey);
     if (yourPoolData == null) {
-        throw new Error("Pool Does Not Exist");
+        throw new Error("Pool does not exist");
     }
     console.log('yourPoolData', yourPoolData);
 

@@ -1,10 +1,20 @@
 import { Keypair, PublicKey, sendAndConfirmTransaction } from '@solana/web3.js';
+import { readFileSync } from 'fs';
 
 import { ConnectionService, SolanaNet } from '../src/config';
 import { createInitializePoolTransaction, createUpdateRatesTransaction } from './transactions';
 import { Pubkeys, Constants } from './constants';
-import { getKeyPair } from '../scripts/get-public-key';
 import { YourPoolData, UserData } from './models';
+
+export function getKeyPair(pathToPrivateKeyFile: string): Keypair {
+  const privateKey = JSON.parse(
+    readFileSync(pathToPrivateKeyFile, {
+      encoding: 'utf8',
+    })
+  ) as number[];
+
+  return Keypair.fromSecretKey(Uint8Array.from(privateKey));
+}
 
 export function getProgramAccount(): Keypair {
   return getKeyPair('../program-keypair.json');
@@ -70,10 +80,19 @@ let change_rates = async (rewards_per_slot: number, max_reward_rate: number, min
 let get_pool_state = async (poolStorage: PublicKey) => {
   let yourPoolData = await YourPoolData.fromAccount(poolStorage);
   if (yourPoolData == null) {
-      throw new Error("Pool Does Not Exist");
+    throw new Error("Pool does not exist");
   }
-  
+
   console.info(yourPoolData);
+}
+
+let get_user_state = async (userStorage: PublicKey) => {
+  let userPoolData = await UserData.fromAccount(userStorage);
+  if (userPoolData == null) {
+    throw new Error("User does not exist");
+  }
+
+  console.info(userPoolData);
 }
 
 if (require.main === module) {
@@ -85,50 +104,71 @@ if (require.main === module) {
   Pubkeys.yourStakingVaultPubkey = yourStakingVault.publicKey;
   Pubkeys.yourRewardsVaultPubkey = yourRewardsVault.publicKey;
 
-  switch( process.argv[2] ) {
+  console.debug(process.argv);
+
+  switch (process.argv[2]) {
     case "initialize_pool": {
-      if (process.argv.length < 4) {
+      if (process.argv.length < 5) {
         throw "signature mismatch; initialize_pool(reward_duration: number, reward_pool: number)";
       }
 
       initialize_pool(Number.parseInt(process.argv[3]), Number.parseInt(process.argv[4]))
-      .then(
-        _ => console.info("Successfully initialized pool")
-      )
-      .catch(
-        reason => console.error(reason)
-      );
+        .then(
+          _ => console.info("Successfully initialized pool")
+        )
+        .catch(
+          reason => console.error(reason)
+        );
 
       break;
     }
     case "change_rates": {
-      if (process.argv.length < 5) {
+      if (process.argv.length < 6) {
         throw "signature mismatch; change_rates(rewards_per_slot: number, max_reward_rate: number, min_reward_rate: number)";
       }
 
       change_rates(Number.parseInt(process.argv[3]), Number.parseInt(process.argv[4]), Number.parseInt(process.argv[5]))
-      .then(
-        _ => console.info("Successfully changed rates")
-      )
-      .catch(
-        reason => console.error(reason)
-      );
+        .then(
+          _ => console.info("Successfully changed rates")
+        )
+        .catch(
+          reason => console.error(reason)
+        );
 
       break;
     }
     case "get_pool_state": {
-      get_pool_state(yourPoolStorageAccount.publicKey)
-      .then(
-        _ => console.info("Successfully requested pool data")
-      )
-      .catch(
-        reason => console.error(reason)
-      );
+      if (process.argv.length < 4) {
+        throw "signature mismatch; get_pool_state(poolStorage: PublicKey)";
+      }
+
+      get_pool_state(new PublicKey(process.argv[3]))
+        .then(
+          _ => console.info("Successfully requested pool data")
+        )
+        .catch(
+          reason => console.error(reason)
+        );
+
+      break;
+    }
+    case "get_user_state": {
+      if (process.argv.length < 4) {
+        throw "signature mismatch; get_user_state(poolStorage: PublicKey)";
+      }
+
+      get_user_state(new PublicKey(process.argv[3]))
+        .then(
+          _ => console.info("Successfully requested user data")
+        )
+        .catch(
+          reason => console.error(reason)
+        );
 
       break;
     }
     default: {
-      throw "unknown command";
+      throw `unknown command ${process.argv[2]}`;
     }
   }
 }

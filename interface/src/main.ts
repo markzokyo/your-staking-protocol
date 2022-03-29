@@ -1,9 +1,10 @@
-import { Keypair, sendAndConfirmTransaction } from '@solana/web3.js';
+import { Keypair, PublicKey, sendAndConfirmTransaction } from '@solana/web3.js';
 
 import { ConnectionService, SolanaNet } from '../src/config';
 import { createInitializePoolTransaction, createUpdateRatesTransaction } from './transactions';
 import { Pubkeys, Constants } from './constants';
 import { getKeyPair } from '../scripts/get-public-key';
+import { YourPoolData, UserData } from './models';
 
 export function getProgramAccount(): Keypair {
   return getKeyPair('../program-keypair.json');
@@ -43,6 +44,7 @@ ConnectionService.setNet(SolanaNet.DEVNET);
 const connection = ConnectionService.getConnection();
 
 let initialize_pool = async (reward_duration: number, reward_pool: number) => {
+  console.debug("initialize_pool", reward_duration, reward_pool);
   const initializePoolTx = await createInitializePoolTransaction(
     adminAccount.publicKey,
     yourPoolStorageAccount,
@@ -51,6 +53,7 @@ let initialize_pool = async (reward_duration: number, reward_pool: number) => {
     reward_duration,
     reward_pool * Constants.toYourRaw
   );
+  console.debug("awaiting transaction", initializePoolTx);
   await sendAndConfirmTransaction(connection, initializePoolTx, [
     adminAccount,
     yourPoolStorageAccount,
@@ -62,6 +65,15 @@ let initialize_pool = async (reward_duration: number, reward_pool: number) => {
 let change_rates = async (rewards_per_slot: number, max_reward_rate: number, min_reward_rate: number) => {
   const createUpdateRatesTx = await createUpdateRatesTransaction(adminAccount.publicKey, rewards_per_slot, max_reward_rate, min_reward_rate);
   await sendAndConfirmTransaction(connection, createUpdateRatesTx, [adminAccount]);
+}
+
+let get_pool_state = async (poolStorage: PublicKey) => {
+  let yourPoolData = await YourPoolData.fromAccount(poolStorage);
+  if (yourPoolData == null) {
+      throw new Error("Pool Does Not Exist");
+  }
+  
+  console.info(yourPoolData);
 }
 
 if (require.main === module) {
@@ -97,6 +109,17 @@ if (require.main === module) {
       change_rates(Number.parseInt(process.argv[3]), Number.parseInt(process.argv[4]), Number.parseInt(process.argv[5]))
       .then(
         _ => console.info("Successfully changed rates")
+      )
+      .catch(
+        reason => console.error(reason)
+      );
+
+      break;
+    }
+    case "get_pool_state": {
+      get_pool_state(yourPoolStorageAccount.publicKey)
+      .then(
+        _ => console.info("Successfully requested pool data")
       )
       .catch(
         reason => console.error(reason)

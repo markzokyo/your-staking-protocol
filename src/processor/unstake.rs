@@ -27,7 +27,7 @@ pub fn process_unstake(
     let user_wallet_account = next_account_info(account_info_iter)?;
     let user_storage_account = next_account_info(account_info_iter)?;
     let your_pool_storage_account = next_account_info(account_info_iter)?;
-    let _your_staking_vault = next_account_info(account_info_iter)?;
+    let _staking_vault = next_account_info(account_info_iter)?;
     let _user_your_ata = next_account_info(account_info_iter)?;
     let _pool_signer_pda = next_account_info(account_info_iter)?;
     let token_program = next_account_info(account_info_iter)?;
@@ -96,10 +96,14 @@ pub fn process_unstake(
         return Err(CustomError::InsufficientFundsToUnstake.into());
     }
 
-    let now = Clock::get()?.unix_timestamp as i64;
+    
+    let current_slot = Clock::get()?.slot;
+    user_storage_data.user_weighted_stake -= user_storage_data.pending_unstake_amount as f64
+        * (1.0 - ((current_slot - your_pool_data.pool_init_slot) as f64) / (your_pool_data.epoch_duration_in_slots as f64));
 
-    user_storage_data.unstake_pending = amount_to_withdraw;
-    user_storage_data.unstake_pending_date = now + 2; // pending for 2 seconds
+    user_storage_data.balance_your_staked -= amount_to_withdraw;
+    user_storage_data.pending_unstake_amount += amount_to_withdraw;
+    user_storage_data.pending_unstake_slot = Clock::get()?.slot + 120; // pending for 120 for testing slots ~60 seconds
     msg!("Moved amount to pending");
 
     your_pool_data_byte_array[0usize..YOUR_POOL_STORAGE_TOTAL_BYTES]

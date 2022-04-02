@@ -103,6 +103,9 @@ if (require.main === module) {
   Pubkeys.yourPoolStoragePubkey = yourPoolStorageAccount.publicKey;
   Pubkeys.yourStakingVaultPubkey = yourStakingVault.publicKey;
   Pubkeys.yourRewardsVaultPubkey = yourRewardsVault.publicKey;
+  for (const [key, value] of Object.entries(Pubkeys)) {
+    console.log(`${key}: ${value}`);
+  }
 
   console.debug(process.argv);
 

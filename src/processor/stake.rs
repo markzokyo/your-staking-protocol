@@ -2,7 +2,7 @@ use crate::{
     error::CustomError,
     processor::create_user::get_user_storage_address_and_bump_seed,
     state::{
-        AccTypesWithVersion, User, YourPool, EPOCH_LENGTH, USER_STORAGE_TOTAL_BYTES,
+        AccTypesWithVersion, User, YourPool, USER_STORAGE_TOTAL_BYTES,
         YOUR_POOL_STORAGE_TOTAL_BYTES,
     },
 };
@@ -30,7 +30,7 @@ pub fn process_stake(
     let user_wallet_account = next_account_info(account_info_iter)?;
     let user_storage_account = next_account_info(account_info_iter)?;
     let your_pool_storage_account = next_account_info(account_info_iter)?;
-    let your_staking_vault = next_account_info(account_info_iter)?;
+    let staking_vault = next_account_info(account_info_iter)?;
     let user_your_ata = next_account_info(account_info_iter)?;
     let token_program = next_account_info(account_info_iter)?;
 
@@ -89,14 +89,14 @@ pub fn process_stake(
         return Err(CustomError::UserPoolMismatched.into());
     }
 
-    if your_staking_vault.owner != token_program.key {
+    if staking_vault.owner != token_program.key {
         msg!("CustomError::AccountOwnerShouldBeTokenProgram");
         return Err(CustomError::AccountOwnerShouldBeTokenProgram.into());
     }
-    let your_staking_vault_data = TokenAccount::unpack(&your_staking_vault.data.borrow())?;
+    let staking_vault_data = TokenAccount::unpack(&staking_vault.data.borrow())?;
     let (pool_signer_address, _bump_seed) =
         Pubkey::find_program_address(&[&your_pool_storage_account.key.to_bytes()], program_id);
-    if your_staking_vault_data.owner != pool_signer_address {
+    if staking_vault_data.owner != pool_signer_address {
         msg!("CustomError::InvalidStakingVault");
         return Err(CustomError::InvalidStakingVault.into());
     }
@@ -106,14 +106,14 @@ pub fn process_stake(
         &spl_token::instruction::transfer(
             token_program.key,
             user_your_ata.key,
-            your_staking_vault.key,
+            staking_vault.key,
             user_wallet_account.key,
             &[],
             amount_to_deposit,
         )?,
         &[
             user_your_ata.clone(),
-            your_staking_vault.clone(),
+            staking_vault.clone(),
             user_wallet_account.clone(),
             token_program.clone(),
         ],
@@ -128,15 +128,14 @@ pub fn process_stake(
         .checked_add(amount_to_deposit)
         .ok_or(CustomError::AmountOverflow)?;
 
-    let epoch_start_timestamp = Clock::get()?.epoch_start_timestamp as f64;
-    let current_time_timestamp = Clock::get()?.unix_timestamp as f64;
-    let user_stake_balance = user_storage_data.balance_your_staked as f64;
+    let current_slot = Clock::get()?.slot;
     let current_epoch_coefficient =
-        1.0 - (current_time_timestamp - epoch_start_timestamp) / (EPOCH_LENGTH as f64);
-
+    1.0 - ((current_slot - your_pool_data.pool_init_slot) as f64) / (your_pool_data.epoch_duration_in_slots as f64);
+    
     // For current user
+    let user_stake_balance = user_storage_data.balance_your_staked as f64;
     user_storage_data.user_weighted_stake = user_stake_balance * current_epoch_coefficient;
-    user_storage_data.user_weighted_epoch = Clock::get()?.epoch_start_timestamp as i64;
+    user_storage_data.user_weighted_epoch = (current_slot - your_pool_data.pool_init_slot) / your_pool_data.epoch_duration_in_slots;
 
     // Same for pool
     let pool_total_stake = your_pool_data.user_total_stake as f64;

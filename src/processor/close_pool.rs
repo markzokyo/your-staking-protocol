@@ -20,7 +20,7 @@ use spl_token::state::Account as TokenAccount;
 pub fn process_close_pool(accounts: &[AccountInfo], program_id: &Pubkey) -> ProgramResult {
     let account_info_iter = &mut accounts.iter();
     let pool_owner_wallet_account = next_account_info(account_info_iter)?;
-    let your_staking_vault = next_account_info(account_info_iter)?;
+    let staking_vault = next_account_info(account_info_iter)?;
     let your_staking_refund_ata = next_account_info(account_info_iter)?;
     let your_rewards_vault = next_account_info(account_info_iter)?;
     let your_rewards_refund_ata = next_account_info(account_info_iter)?;
@@ -56,23 +56,23 @@ pub fn process_close_pool(accounts: &[AccountInfo], program_id: &Pubkey) -> Prog
         return Err(CustomError::PoolOwnerMismatched.into());
     }
 
-    if your_staking_vault.owner != token_program.key {
+    if staking_vault.owner != token_program.key {
         msg!("CustomError::AccountOwnerShouldBeTokenProgram");
         return Err(CustomError::AccountOwnerShouldBeTokenProgram.into());
     }
 
-    let your_staking_vault_data = TokenAccount::unpack(&your_staking_vault.data.borrow())?;
+    let staking_vault_data = TokenAccount::unpack(&staking_vault.data.borrow())?;
     let (pool_signer_address, bump_seed) =
         Pubkey::find_program_address(&[&your_pool_storage_account.key.to_bytes()], program_id);
 
-    if your_staking_vault_data.owner != pool_signer_address
-        || your_pool_data.your_staking_vault != *your_staking_vault.key
+    if staking_vault_data.owner != pool_signer_address
+        || your_pool_data.staking_vault != *staking_vault.key
     {
         msg!("CustomError::InvalidStakingVault");
         return Err(CustomError::InvalidStakingVault.into());
     }
 
-    if your_pool_data.user_stake_count != 0u32 || your_staking_vault_data.amount != 0u64
+    if your_pool_data.user_stake_count != 0u32 || staking_vault_data.amount != 0u64
     {
         msg!("CustomError::PoolStillActive");
         return Err(CustomError::PoolStillActive.into());
@@ -82,14 +82,14 @@ pub fn process_close_pool(accounts: &[AccountInfo], program_id: &Pubkey) -> Prog
     invoke_signed(
         &spl_token::instruction::transfer(
             token_program.key,
-            your_staking_vault.key,
+            staking_vault.key,
             your_staking_refund_ata.key,
             &pool_signer_address,
             &[&pool_signer_address],
-            your_staking_vault_data.amount,
+            staking_vault_data.amount,
         )?,
         &[
-            your_staking_vault.clone(),
+            staking_vault.clone(),
             your_staking_refund_ata.clone(),
             pool_signer_pda.clone(),
             token_program.clone(),
@@ -124,13 +124,13 @@ pub fn process_close_pool(accounts: &[AccountInfo], program_id: &Pubkey) -> Prog
     invoke_signed(
         &spl_token::instruction::close_account(
             token_program.key,
-            your_staking_vault.key,
+            staking_vault.key,
             pool_owner_wallet_account.key,
             &pool_signer_address,
             &[&pool_signer_address],
         )?,
         &[
-            your_staking_vault.clone(),
+            staking_vault.clone(),
             pool_owner_wallet_account.clone(),
             pool_signer_pda.clone(),
             token_program.clone(),
@@ -156,7 +156,7 @@ pub fn process_close_pool(accounts: &[AccountInfo], program_id: &Pubkey) -> Prog
         &[&[&your_pool_storage_account.key.to_bytes()[..], &[bump_seed]]],
     )?;
 
-    your_pool_data.your_staking_vault = Pubkey::default();
+    your_pool_data.staking_vault = Pubkey::default();
     your_pool_data_byte_array[0usize..YOUR_POOL_STORAGE_TOTAL_BYTES]
         .copy_from_slice(&your_pool_data.try_to_vec().unwrap());
     Ok(())

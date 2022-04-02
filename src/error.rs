@@ -65,10 +65,10 @@ pub enum CustomError {
     #[error("Pool Address Already Initialized")]
     PoolAddressAlreadyInitialized,
     // Pool Address Already Initialized
-    #[error("User claim reward timeout didn't expired")]
+    #[error("User claim reward timeout not yet expired")]
     UserClaimRewardTimeout,
     // Pool Address Already Initialized
-    #[error("User final unstake timeout didn't expired")]
+    #[error("User final unstake timeout not yet expired")]
     UserFinalUnstakeTimeout,
     // User claim reward amount is Zero
     #[error("User claim reward amount is Zero")]

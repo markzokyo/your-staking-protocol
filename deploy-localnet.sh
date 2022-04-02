@@ -2,8 +2,8 @@
 
 set -e
 
-SOLANA_URL=http://127.0.0.1:8899
-# SOLANA_URL=https://api.devnet.solana.com
+# SOLANA_URL=http://127.0.0.1:8899
+SOLANA_URL=https://api.devnet.solana.com
 # SOLANA_URL=https://wispy-spring-smoke.solana-devnet.quiknode.pro/0a2e6fb3b957319da150ae3bd922de842dcb93b5/
 # wss://wispy-spring-smoke.solana-devnet.quiknode.pro/0a2e6fb3b957319da150ae3bd922de842dcb93b5/
 

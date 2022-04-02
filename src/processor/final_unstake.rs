@@ -2,7 +2,7 @@ use crate::{
     error::CustomError,
     processor::create_user::get_user_storage_address_and_bump_seed,
     state::{
-        AccTypesWithVersion, User, YourPool, EPOCH_LENGTH, USER_STORAGE_TOTAL_BYTES,
+        AccTypesWithVersion, User, YourPool, USER_STORAGE_TOTAL_BYTES,
         YOUR_POOL_STORAGE_TOTAL_BYTES,
     },
 };
@@ -24,7 +24,7 @@ pub fn process_final_unstake(accounts: &[AccountInfo], program_id: &Pubkey) -> P
     let user_wallet_account = next_account_info(account_info_iter)?;
     let user_storage_account = next_account_info(account_info_iter)?;
     let your_pool_storage_account = next_account_info(account_info_iter)?;
-    let your_staking_vault = next_account_info(account_info_iter)?;
+    let staking_vault = next_account_info(account_info_iter)?;
     let user_your_ata = next_account_info(account_info_iter)?;
     let pool_signer_pda = next_account_info(account_info_iter)?;
     let token_program = next_account_info(account_info_iter)?;
@@ -86,42 +86,35 @@ pub fn process_final_unstake(accounts: &[AccountInfo], program_id: &Pubkey) -> P
     let (pool_signer_address, bump_seed) =
         Pubkey::find_program_address(&[&your_pool_storage_account.key.to_bytes()], program_id);
 
-    let now = Clock::get()?.unix_timestamp as i64;
-    if now > user_storage_data.unstake_pending_date {
-        msg!("Calling the token program to transfer YOUR to User from Staking Vault...");
-        invoke_signed(
-            &spl_token::instruction::transfer(
-                token_program.key,
-                your_staking_vault.key,
-                user_your_ata.key,
-                &pool_signer_address,
-                &[&pool_signer_address],
-                user_storage_data.unstake_pending,
-            )?,
-            &[
-                your_staking_vault.clone(),
-                user_your_ata.clone(),
-                pool_signer_pda.clone(),
-                token_program.clone(),
-            ],
-            &[&[&your_pool_storage_account.key.to_bytes(), &[bump_seed]]],
-        )?;
-
-        let epoch_start_timestamp = Clock::get()?.epoch_start_timestamp as f64;
-        let current_time_timestamp = Clock::get()?.unix_timestamp as f64;
-        user_storage_data.user_weighted_stake -= user_storage_data.unstake_pending as f64
-            * (1.0 - (current_time_timestamp - epoch_start_timestamp) / (EPOCH_LENGTH as f64));
-
-        user_storage_data.balance_your_staked = user_storage_data
-            .balance_your_staked
-            .checked_sub(user_storage_data.unstake_pending)
-            .ok_or(CustomError::AmountOverflow)?;
-    } else {
+    if Clock::get()?.slot < user_storage_data.pending_unstake_slot {
         msg!("CustomError::UserFinalUnstakeTimeout");
         return Err(CustomError::UserFinalUnstakeTimeout.into());
     }
 
-    user_storage_data.unstake_pending = 0u64;
+    invoke_signed(
+        &spl_token::instruction::transfer(
+            token_program.key,
+            staking_vault.key,
+            user_your_ata.key,
+            &pool_signer_address,
+            &[&pool_signer_address],
+            user_storage_data.pending_unstake_amount,
+        )?,
+        &[
+            staking_vault.clone(),
+            user_your_ata.clone(),
+            pool_signer_pda.clone(),
+            token_program.clone(),
+        ],
+        &[&[&your_pool_storage_account.key.to_bytes(), &[bump_seed]]],
+    )?;
+
+    user_storage_data.balance_your_staked = user_storage_data
+        .balance_your_staked
+        .checked_sub(user_storage_data.pending_unstake_amount)
+        .ok_or(CustomError::AmountOverflow)?;
+
+    user_storage_data.pending_unstake_amount = 0u64;
     your_pool_data_byte_array[0usize..YOUR_POOL_STORAGE_TOTAL_BYTES]
         .copy_from_slice(&your_pool_data.try_to_vec().unwrap());
     user_data_byte_array[0usize..USER_STORAGE_TOTAL_BYTES]

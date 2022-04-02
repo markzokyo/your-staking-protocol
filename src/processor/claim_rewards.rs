@@ -2,7 +2,7 @@ use crate::{
     error::CustomError,
     processor::create_user::get_user_storage_address_and_bump_seed,
     state::{
-        AccTypesWithVersion, User, YourPool, EPOCH_LENGTH, USER_STORAGE_TOTAL_BYTES,
+        AccTypesWithVersion, User, YourPool, USER_STORAGE_TOTAL_BYTES,
         YOUR_POOL_STORAGE_TOTAL_BYTES,
     },
     utils,
@@ -26,7 +26,7 @@ pub fn process_claim_rewards(accounts: &[AccountInfo], program_id: &Pubkey) -> P
     let user_wallet_account = next_account_info(account_info_iter)?;
     let user_storage_account = next_account_info(account_info_iter)?;
     let your_pool_storage_account = next_account_info(account_info_iter)?;
-    let your_staking_vault = next_account_info(account_info_iter)?;
+    let staking_vault = next_account_info(account_info_iter)?;
     let your_rewards_vault = next_account_info(account_info_iter)?;
     let user_rewards_ata = next_account_info(account_info_iter)?;
     let pool_signer_pda = next_account_info(account_info_iter)?;
@@ -86,29 +86,29 @@ pub fn process_claim_rewards(accounts: &[AccountInfo], program_id: &Pubkey) -> P
         return Err(CustomError::UserPoolMismatched.into());
     }
 
-    if your_staking_vault.owner != token_program.key {
+    if staking_vault.owner != token_program.key {
         msg!("CustomError::AccountOwnerShouldBeTokenProgram");
         return Err(CustomError::AccountOwnerShouldBeTokenProgram.into());
     }
 
-    let your_staking_vault_data = TokenAccount::unpack(&your_staking_vault.data.borrow())?;
+    let staking_vault_data = TokenAccount::unpack(&staking_vault.data.borrow())?;
     let (pool_signer_address, bump_seed) =
         Pubkey::find_program_address(&[&your_pool_storage_account.key.to_bytes()], program_id);
 
-    if your_staking_vault_data.owner != pool_signer_address {
+    if staking_vault_data.owner != pool_signer_address {
         msg!("CustomError::InvalidStakingVault");
         return Err(CustomError::InvalidStakingVault.into());
     }
 
-    let now = Clock::get()?.unix_timestamp as i64;
-    if user_storage_data.claim_timeout_date <= now || user_storage_data.claim_timeout_date == 0 {
+    let now = Clock::get()?.slot;
+    if user_storage_data.claim_timeout_slot <= now || user_storage_data.claim_timeout_slot == 0 {
         let max_reward_rate = your_pool_data.max_reward_rate as f64 / 10000.0;
         let min_reward_rate = your_pool_data.min_reward_rate as f64 / 10000.0;
         let rewards_per_slot = your_pool_data.rewards_per_slot;
         let total_weighted_stake = your_pool_data.total_weighted_stake;
         let user_weighted_stake = user_storage_data.user_weighted_stake;
         let unclaimed_epochs =
-            ((now - user_storage_data.user_weighted_epoch) / EPOCH_LENGTH as i64) as u64;
+            ((now - user_storage_data.user_weighted_epoch) / your_pool_data.epoch_duration_in_slots) as u64;
         let total_stake = your_pool_data.user_total_stake as f64;
         let user_stake = user_storage_data.balance_your_staked as f64;
 
@@ -117,18 +117,20 @@ pub fn process_claim_rewards(accounts: &[AccountInfo], program_id: &Pubkey) -> P
                 max_reward_rate,
                 utils::max(
                     min_reward_rate,
-                    rewards_per_slot as f64 * EPOCH_LENGTH as f64 / total_weighted_stake as f64,
+                    rewards_per_slot as f64 * your_pool_data.epoch_duration_in_slots as f64 / total_weighted_stake as f64,
                 ),
             );
 
-        if user_storage_data.user_weighted_epoch != Clock::get()?.epoch_start_timestamp {
+        let current_slot = Clock::get()?.slot;
+        let current_epoch = (current_slot - your_pool_data.pool_init_slot) / your_pool_data.epoch_duration_in_slots;
+        if user_storage_data.user_weighted_epoch != current_epoch {
             reward_amount += unclaimed_epochs as f64
                 * user_stake
                 * utils::min(
                     max_reward_rate,
                     utils::max(
                         min_reward_rate,
-                        rewards_per_slot as f64 * EPOCH_LENGTH as f64 / total_stake,
+                        rewards_per_slot as f64 * your_pool_data.epoch_duration_in_slots as f64 / total_stake,
                     ),
                 );
         }
@@ -157,7 +159,7 @@ pub fn process_claim_rewards(accounts: &[AccountInfo], program_id: &Pubkey) -> P
             &[&[&your_pool_storage_account.key.to_bytes(), &[bump_seed]]],
         )?;
 
-        user_storage_data.claim_timeout_date = now + 86400; // in seconds
+        user_storage_data.claim_timeout_slot = now + 86400; // in seconds
     } else {
         msg!("CustomError::UserClaimRewardTimeout");
         return Err(CustomError::UserClaimRewardTimeout.into());

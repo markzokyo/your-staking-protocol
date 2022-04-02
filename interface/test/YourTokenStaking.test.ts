@@ -1,4 +1,5 @@
 import { ConnectionService } from "../src/config";
+import { Pubkeys } from "../src/constants";
 import {
     createUserTransaction,
     closeUserTransaction,
@@ -28,6 +29,7 @@ describe('Your Token Staking Tests', () => {
 
     beforeAll(async () => {
         await setupEnvironment();
+        console.log("Pubkeys", Pubkeys);
     });
 
     test('Initialize Pool', async () => {

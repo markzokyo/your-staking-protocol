@@ -72,7 +72,7 @@ export async function unstakeYourTransaction(
     });
     const unstakeYourTx = new Transaction().add(unstakeYourIx);
     unstakeYourTx.recentBlockhash = (
-        await connection.getRecentBlockhash()
+        await connection.getLatestBlockhash()
     ).blockhash;
     unstakeYourTx.feePayer = userWallet;
 

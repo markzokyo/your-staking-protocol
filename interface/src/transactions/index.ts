@@ -5,4 +5,4 @@ export * from './claim-rewards-transaction';
 export * from './unstake-your-transaction';
 export * from './close-pool-transaction';
 export * from './close-user-transaction';
-
+export * from './update_rates_transaction';

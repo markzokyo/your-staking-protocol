@@ -2,8 +2,8 @@ use crate::{
     error::CustomError,
     state::{AccTypesWithVersion, YourPool, YOUR_POOL_STORAGE_TOTAL_BYTES},
 };
-use solana_program::sysvar::clock::Clock;
-use solana_program::sysvar::Sysvar;
+
+
 
 use borsh::{BorshDeserialize, BorshSerialize};
 use solana_program::{
@@ -72,14 +72,7 @@ pub fn process_close_pool(accounts: &[AccountInfo], program_id: &Pubkey) -> Prog
         return Err(CustomError::InvalidStakingVault.into());
     }
 
-    let total_your_staked = your_staking_vault_data.amount;
-
-    let now = Clock::get()?.unix_timestamp;
-
-    if your_pool_data.reward_duration_end <= 0u64
-        || your_pool_data.reward_duration_end >= (now as u64)
-        || your_pool_data.user_stake_count != 0u32
-        || total_your_staked != 0u64
+    if your_pool_data.user_stake_count != 0u32 || your_staking_vault_data.amount != 0u64
     {
         msg!("CustomError::PoolStillActive");
         return Err(CustomError::PoolStillActive.into());

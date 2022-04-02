@@ -167,11 +167,9 @@ pub fn process_initialize_your_pool(
     your_pool_data.acc_type = AccTypesWithVersion::YourPoolDataV1 as u8;
     your_pool_data.owner_wallet = *pool_owner_wallet_account.key;
     your_pool_data.your_staking_vault = *your_staking_vault.key;
-    your_pool_data.your_reward_rate = 0u64;
     your_pool_data.your_epoch_duration = reward_duration;
     your_pool_data.user_stake_count = 0u32;
     your_pool_data.pda_nonce = bump_seed;
-    your_pool_data.reward_duration_end = 0u64;
     your_pool_data.rewards_per_slot = 0u64;
     your_pool_data.max_reward_rate = 0u64;
     your_pool_data.min_reward_rate = 0u64;
@@ -203,28 +201,7 @@ pub fn process_initialize_your_pool(
         return Err(CustomError::InvalidStakingVault.into());
     }
 
-    let now = Clock::get()?.unix_timestamp as u64;
-    let reward_duration_end = your_pool_data.reward_duration_end;
-    msg!("now: {}", now);
-    msg!("reward_duration_end: {}", reward_duration_end);
-    msg!("fund_pool: {}", fund_pool);
-    if now < reward_duration_end {
-        let remaining_duration = reward_duration_end
-            .checked_sub(now)
-            .ok_or(CustomError::AmountOverflow)?;
-        let rewards_left_amount = remaining_duration
-            .checked_mul(your_pool_data.your_reward_rate)
-            .ok_or(CustomError::AmountOverflow)?;
-        your_pool_data.your_reward_rate = fund_pool
-            .checked_add(rewards_left_amount)
-            .ok_or(CustomError::AmountOverflow)?
-            .checked_div(your_pool_data.your_epoch_duration)
-            .ok_or(CustomError::AmountOverflow)?;
-    } else {
-        your_pool_data.your_reward_rate = fund_pool
-            .checked_div(your_pool_data.your_epoch_duration)
-            .ok_or(CustomError::AmountOverflow)?;
-    }
+    let _now = Clock::get()?.unix_timestamp as u64;
 
     if fund_pool > 0 {
         msg!("Calling the token program to transfer YOUR rewards to Rewards Vault...");
@@ -245,13 +222,7 @@ pub fn process_initialize_your_pool(
             ],
         )?;
     }
-    msg!(
-        "your_pool_data.your_reward_rate: {}",
-        your_pool_data.your_reward_rate
-    );
-    your_pool_data.reward_duration_end = now
-        .checked_add(your_pool_data.your_epoch_duration)
-        .ok_or(CustomError::AmountOverflow)?;
+
     your_pool_data_byte_array[0usize..YOUR_POOL_STORAGE_TOTAL_BYTES]
         .copy_from_slice(&your_pool_data.try_to_vec().unwrap());
 

@@ -9,29 +9,46 @@ import { Constants } from '../constants';
 
 export class UserData {
     accountType: number;
+
     userWallet: StringPublicKey;
     yourPool: StringPublicKey;
-    balanceStaked: BN;
+
+    unstakePending: BN;
+    unstakePendingDate: BN;
+
     nonce: number;
-    rewardPerTokenPending: BN;
-    rewardsPerTokenCompleted: BN;
+    claimTimeoutDate: BN;
+
+    userWeightedEpoch: BN;
+    userWeightedStake: BN;
+    balanceYourStaked: BN;
 
     constructor(args: {
         accountType: number;
+    
         userWallet: StringPublicKey;
         yourPool: StringPublicKey;
-        balanceStaked: BN;
+    
+        unstakePending: BN;
+        unstakePendingDate: BN;
+    
         nonce: number;
-        rewardPerTokenPending: BN;
-        rewardsPerTokenCompleted: BN;
+        claimTimeoutDate: BN;
+    
+        userWeightedEpoch: BN;
+        userWeightedStake: BN;
+        balanceYourStaked: BN;
     }) {
         this.accountType = args.accountType;
         this.userWallet = args.userWallet;
         this.yourPool = args.yourPool;
-        this.balanceStaked = args.balanceStaked;
+        this.unstakePending = args.unstakePending;
+        this.unstakePendingDate = args.unstakePendingDate;
         this.nonce = args.nonce;
-        this.rewardPerTokenPending = args.rewardPerTokenPending;
-        this.rewardsPerTokenCompleted = args.rewardsPerTokenCompleted;
+        this.claimTimeoutDate = args.claimTimeoutDate;
+        this.userWeightedEpoch = args.userWeightedEpoch;
+        this.userWeightedStake = args.userWeightedStake;
+        this.balanceYourStaked = args.balanceYourStaked;
     }
 
     getUserWalletPubkey(): PublicKey {
@@ -43,22 +60,12 @@ export class UserData {
     }
 
     getBalanceStaked(): number {
-        return this.balanceStaked.div(new BN(Constants.toYourRaw)).toNumber();
+        return this.balanceYourStaked.div(new BN(Constants.toYourRaw)).toNumber();
     }
 
     getNonce(): number {
         return this.nonce;
     }
-
-    getRewardPerTokenPending(): number {
-        return this.rewardPerTokenPending.div(new BN(Constants.toRewardTokenRaw)).toNumber();
-    }
-
-    getRewardPerTokenCompleted(): number {
-        return this.rewardsPerTokenCompleted.div(new BN(Constants.toRewardTokenRaw).mul(new BN('18446744073709551615'))).toNumber();
-    }
-
-    
 
     static async fromAccount(account: PublicKey): Promise<UserData | null> {
         const connection = ConnectionService.getConnection();
@@ -77,7 +84,7 @@ export class UserData {
     }
 }
 
-export const USER_STORAGE_TOTAL_BYTES = 98;
+export const USER_STORAGE_TOTAL_BYTES = 114;
 
 export const USER_STORAGE_DATA_ON_CHAIN_SCHEMA = new Map<any, any>([
     [
@@ -88,10 +95,13 @@ export const USER_STORAGE_DATA_ON_CHAIN_SCHEMA = new Map<any, any>([
                 ['accountType', 'u8'],
                 ['userWallet', 'pubkeyAsString'],
                 ['yourPool', 'pubkeyAsString'],
-                ['balanceStaked', 'u64'],
+                ['unstakePending', 'u64'],
+                ['unstakePendingDate', 'u64'],
                 ['nonce', 'u8'],
-                ['rewardPerTokenPending', 'u64'],
-                ['rewardsPerTokenCompleted', 'u128'],
+                ['claimTimeoutDate', 'u64'],
+                ['userWeightedEpoch', 'u64'],
+                ['userWeightedStake', 'u64'],
+                ['balanceYourStaked', 'u64'],
             ],
         },
     ],

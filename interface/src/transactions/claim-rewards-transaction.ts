@@ -95,7 +95,7 @@ export async function claimRewardsTransaction(
     claimRewardsIxs.push(claimRewardsIx);
     const claimRewardsTx = new Transaction().add(...claimRewardsIxs);
     claimRewardsTx.recentBlockhash = (
-        await connection.getRecentBlockhash()
+        await connection.getLatestBlockhash()
     ).blockhash;
     claimRewardsTx.feePayer = userWallet;
 

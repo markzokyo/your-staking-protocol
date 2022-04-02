@@ -5,8 +5,7 @@ import {PublicKey} from '@solana/web3.js';
  */
 export class Pubkeys {
   static yourStakingProgramId = new PublicKey(
-    (process.env.SOLANA_PROGRAM_ID as string) ??
-      (process.env.REACT_APP_SOLANA_PROGRAM_ID as string)
+    (process.env.REACT_APP_SOLANA_PROGRAM_ID as string) ?? 'AVZLpJUVMSUYnwDVrW8sYurvZ8YuVKsimy1T4mSzttX5'
   );
 
   static splAssociatedTokenAccountProgramId = new PublicKey(
@@ -14,26 +13,26 @@ export class Pubkeys {
   );
 
   static yourTokenMintPubkey = new PublicKey(
-    'HfYFjMKNZygfMC8LsQ8LtpPsPxEJoXJx4M6tqi75Hajo'
+    'AZ2rxXUmnffG5AjLSfQYYhXCJYEaBFFpxqHBL8PmWxru'
   );
 
   static stakingMintPubkey = new PublicKey(
-    'HfYFjMKNZygfMC8LsQ8LtpPsPxEJoXJx4M6tqi75Hajo'
+    'AZ2rxXUmnffG5AjLSfQYYhXCJYEaBFFpxqHBL8PmWxru'
   );
 
   static rewardsMintPubkey = new PublicKey(
-    'HfYFjMKNZygfMC8LsQ8LtpPsPxEJoXJx4M6tqi75Hajo'
+    'AZ2rxXUmnffG5AjLSfQYYhXCJYEaBFFpxqHBL8PmWxru'
   );
 
   static yourPoolStoragePubkey = new PublicKey(
-    'HfYFjMKNZygfMC8LsQ8LtpPsPxEJoXJx4M6tqi75Hajo'
+    'AZ2rxXUmnffG5AjLSfQYYhXCJYEaBFFpxqHBL8PmWxru'
   );
 
   static yourStakingVaultPubkey = new PublicKey(
-    'HfYFjMKNZygfMC8LsQ8LtpPsPxEJoXJx4M6tqi75Hajo'
+    'AZ2rxXUmnffG5AjLSfQYYhXCJYEaBFFpxqHBL8PmWxru'
   );
 
   static yourRewardsVaultPubkey = new PublicKey(
-    'HfYFjMKNZygfMC8LsQ8LtpPsPxEJoXJx4M6tqi75Hajo'
+    'AZ2rxXUmnffG5AjLSfQYYhXCJYEaBFFpxqHBL8PmWxru'
   );
 }

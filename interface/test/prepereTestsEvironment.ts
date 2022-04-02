@@ -1,32 +1,30 @@
-import {getAdminAccount, requestAirdrop} from "./testHelpers";
+import {requestAirdrop} from "./testHelpers";
 import {Keypair, sendAndConfirmTransaction, Transaction} from "@solana/web3.js";
 import {Constants, Pubkeys} from "../src/constants";
 import {ConnectionService} from "../src/config";
 import {ASSOCIATED_TOKEN_PROGRAM_ID, Token, TOKEN_PROGRAM_ID, u64} from '@solana/spl-token';
 import {findAssociatedTokenAddress} from "../src/utils";
 import BN from "bn.js";
-import {
-    createInitializePoolTransaction, createUserTransaction
-} from "../src/transactions";
 
-const adminAccount: Keypair = getAdminAccount();
+const adminAccount: Keypair = Keypair.generate();
+
+const yourPoolStorageAccount: Keypair = Keypair.generate();
+const yourStakingVault: Keypair = Keypair.generate();
+const yourRewardsVault: Keypair = Keypair.generate();
+
 const walletAccount: Keypair = Keypair.generate();
-let yourPoolStorageAccount: Keypair;
-let yourStakingVault: Keypair;
-let yourRewardsVault: Keypair;
+
 const rewardDurationInDays: number = 1 / 86400;
 const yourDecimals = 9;
 const rewardTokenDecimals = 9;
-
-/** wallets for claim rewards **/
-const wallet1Account: Keypair = Keypair.generate();
-const wallet2Account: Keypair = Keypair.generate();
 
 async function setupEnvironment() {
     Constants.yourDecimals = yourDecimals;
     Constants.rewardTokenDecimals = rewardTokenDecimals;
 
     const connection = ConnectionService.getConnection();
+
+    await requestAirdrop(adminAccount.publicKey);
 
     const yourTokenMint = await Token.createMint(
         connection,
@@ -36,29 +34,19 @@ async function setupEnvironment() {
         yourDecimals,
         TOKEN_PROGRAM_ID
     );
+
     Pubkeys.stakingMintPubkey = yourTokenMint.publicKey;
     Pubkeys.yourTokenMintPubkey = yourTokenMint.publicKey;
 
-    const rewardTokenMint = await Token.createMint(
-        connection,
-        adminAccount,
-        adminAccount.publicKey,
-        null,
-        rewardTokenDecimals,
-        TOKEN_PROGRAM_ID
-    );
+    const rewardTokenMint = yourTokenMint;
     Pubkeys.rewardsMintPubkey = rewardTokenMint.publicKey;
 
-    yourPoolStorageAccount = Keypair.generate();
-    yourStakingVault = Keypair.generate();
-    yourRewardsVault = Keypair.generate();
-
-    const funderRewardTokenData = await findAssociatedTokenAddress(
+    const adminRewardTokenData = await findAssociatedTokenAddress(
         adminAccount.publicKey,
         Pubkeys.rewardsMintPubkey
     );
     const funderRewardAtaInfo = await connection.getAccountInfo(
-        funderRewardTokenData
+        adminRewardTokenData
     );
     const doesRewardsAtaExist = funderRewardAtaInfo?.owner !== undefined;
 
@@ -68,7 +56,7 @@ async function setupEnvironment() {
                 ASSOCIATED_TOKEN_PROGRAM_ID,
                 TOKEN_PROGRAM_ID,
                 Pubkeys.rewardsMintPubkey,
-                funderRewardTokenData,
+                adminRewardTokenData,
                 adminAccount.publicKey,
                 adminAccount.publicKey
             );
@@ -85,16 +73,12 @@ async function setupEnvironment() {
         .mul(new BN(Constants.toYourRaw))
         .toArray('le', 8);
     await rewardTokenMint.mintTo(
-        funderRewardTokenData,
+        adminRewardTokenData,
         adminAccount.publicKey,
         [],
         new u64(rewardTokensToMintRaw)
     );
 
-    await requestAirdrop(adminAccount.publicKey);
-    Pubkeys.yourPoolStoragePubkey = yourPoolStorageAccount.publicKey;
-    Pubkeys.yourStakingVaultPubkey = yourStakingVault.publicKey;
-    Pubkeys.yourRewardsVaultPubkey = yourRewardsVault.publicKey;
 
     await requestAirdrop(walletAccount.publicKey);
 
@@ -129,6 +113,10 @@ async function setupEnvironment() {
         [],
         new u64(yourTokensToMintRaw)
     );
+
+    Pubkeys.yourPoolStoragePubkey = yourPoolStorageAccount.publicKey;
+    Pubkeys.yourStakingVaultPubkey = yourStakingVault.publicKey;
+    Pubkeys.yourRewardsVaultPubkey = yourRewardsVault.publicKey;
 }
 
 export {

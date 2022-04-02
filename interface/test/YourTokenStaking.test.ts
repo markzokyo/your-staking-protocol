@@ -1,4 +1,4 @@
-import {ConnectionService} from "../src/config";
+import { ConnectionService } from "../src/config";
 import {
     createUserTransaction,
     closeUserTransaction,
@@ -6,7 +6,7 @@ import {
     stakeYourTransaction,
     unstakeYourTransaction, claimRewardsTransaction, createInitializePoolTransaction
 } from "../src/transactions";
-import {setupTest, timeout} from './testHelpers';
+import { setupTest, timeout } from './testHelpers';
 import {
     adminAccount,
     setupEnvironment,
@@ -17,13 +17,10 @@ import {
     rewardDurationInDays,
 
 } from "./prepereTestsEvironment";
-import {sendAndConfirmTransaction, SystemProgram, Transaction, TransactionInstruction} from "@solana/web3.js";
-import {finalUnstakeYourTransaction} from "../src/transactions/final-unstake-your-transaction";
-import {createUpdateRatesTransaction} from "../src/transactions/update_rates_transaction";
-import {getUserStorageAccountWithNonce} from "../src/utils";
-import {Pubkeys} from "../src/constants";
-import {YourStakingInstructions} from "../src/models";
-import BN from "bn.js";
+import { sendAndConfirmTransaction } from "@solana/web3.js";
+import { finalUnstakeYourTransaction } from "../src/transactions/final-unstake-your-transaction";
+import { createUpdateRatesTransaction } from "../src/transactions/update_rates_transaction";
+import { getUserPendingRewards } from "../src/models";
 
 setupTest();
 
@@ -72,6 +69,11 @@ describe('Your Token Staking Tests', () => {
             amountToStake
         );
         await sendAndConfirmTransaction(connection, stakeYourTx, [walletAccount]);
+    })
+
+    test('List Rewards', async () => {
+        const rewards = await getUserPendingRewards(walletAccount.publicKey);
+        console.log(rewards);
     })
 
     test('Claim Rewards', async () => {

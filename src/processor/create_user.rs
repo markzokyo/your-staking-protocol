@@ -166,7 +166,7 @@ pub fn assert_derivation(
     account: &AccountInfo,
     path: &[&[u8]],
 ) -> Result<u8, ProgramError> {
-    let (key, bump) = Pubkey::find_program_address(&path, program_id);
+    let (key, bump) = Pubkey::find_program_address(path, program_id);
     if key != *account.key {
         return Err(CustomError::DerivedKeyInvalid.into());
     }

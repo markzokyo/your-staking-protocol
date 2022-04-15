@@ -139,8 +139,7 @@ pub fn process_stake(
 
     // Same for pool
     let pool_total_stake = your_pool_data.user_total_stake as f64;
-    your_pool_data.total_weighted_stake = pool_total_stake * current_epoch_coefficient;
-    your_pool_data.weighted_epoch_id = Clock::get()?.epoch_start_timestamp as i64;
+    your_pool_data.user_total_weighted_stake = pool_total_stake * current_epoch_coefficient;
 
     your_pool_data_byte_array[0usize..YOUR_POOL_STORAGE_TOTAL_BYTES]
         .copy_from_slice(&your_pool_data.try_to_vec().unwrap());

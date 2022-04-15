@@ -47,4 +47,16 @@ echo "PROGRAM DEPLOY"
 solana program deploy --commitment confirmed  --keypair ./$PAYER_KEYPAIR_FILE ./target/deploy/your_staking.so --program-id ./$PROGRAM_KEYPAIR_FILE
 
 solana program show $(solana-keygen pubkey $PROGRAM_KEYPAIR_FILE)
+
+
+POOL_KEYPAIR_FILE=pool-storage-keypair.json
+yes | solana-keygen new --force --outfile ./$POOL_KEYPAIR_FILE
+
+STAKING_KEYPAIR_FILE=staking-vault-keypair.json
+yes | solana-keygen new --force --outfile ./$STAKING_KEYPAIR_FILE
+
+REWARD_KEYPAIR_FILE=reward-vault-keypair.json
+yes | solana-keygen new --force --outfile ./$REWARD_KEYPAIR_FILE
+
 echo "DONE"
+

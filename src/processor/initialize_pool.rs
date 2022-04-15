@@ -112,7 +112,7 @@ pub fn process_initialize_your_pool(
             Some(&pool_signer_address),
             spl_token::instruction::AuthorityType::AccountOwner,
             pool_owner_wallet_account.key,
-            &[&pool_owner_wallet_account.key],
+            &[pool_owner_wallet_account.key],
         )?,
         &[
             staking_vault.clone(),
@@ -131,7 +131,7 @@ pub fn process_initialize_your_pool(
             Some(&pool_signer_address),
             spl_token::instruction::AuthorityType::AccountOwner,
             pool_owner_wallet_account.key,
-            &[&pool_owner_wallet_account.key],
+            &[pool_owner_wallet_account.key],
         )?,
         &[
             your_rewards_vault.clone(),
@@ -173,8 +173,7 @@ pub fn process_initialize_your_pool(
     your_pool_data.user_stake_count = 0u32;
     your_pool_data.user_total_stake = 0u64;
 
-    your_pool_data.weighted_epoch_id = 0i64;
-    your_pool_data.total_weighted_stake = 0f64;
+    your_pool_data.user_total_weighted_stake = 0f64;
 
     your_pool_data.pool_init_slot = Clock::get()?.slot;
     your_pool_data.epoch_duration_in_slots = reward_duration;

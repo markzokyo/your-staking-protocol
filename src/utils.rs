@@ -43,7 +43,7 @@ pub fn earned(
     let updated_reward_per_token_pending = reward_per_token_pending
         .checked_add(mul)
         .ok_or(CustomError::AmountOverflow)?;
-    return Ok(updated_reward_per_token_pending);
+    Ok(updated_reward_per_token_pending)
 }
 
 pub fn min(f1: f64, f2: f64) -> f64 {

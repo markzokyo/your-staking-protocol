@@ -103,7 +103,7 @@ pub fn process_unstake(
 
     user_storage_data.balance_your_staked -= amount_to_withdraw;
     user_storage_data.pending_unstake_amount += amount_to_withdraw;
-    user_storage_data.pending_unstake_slot = Clock::get()?.slot + 120; // pending for 120 for testing slots ~60 seconds
+    user_storage_data.pending_unstake_slot = Clock::get()?.slot + 1; // pending for 120 for testing slots ~60 seconds
     msg!("Moved amount to pending");
 
     your_pool_data_byte_array[0usize..YOUR_POOL_STORAGE_TOTAL_BYTES]

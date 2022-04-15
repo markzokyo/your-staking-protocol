@@ -105,7 +105,7 @@ pub fn process_claim_rewards(accounts: &[AccountInfo], program_id: &Pubkey) -> P
         let max_reward_rate = your_pool_data.max_reward_rate as f64 / 10000.0;
         let min_reward_rate = your_pool_data.min_reward_rate as f64 / 10000.0;
         let rewards_per_slot = your_pool_data.rewards_per_slot;
-        let total_weighted_stake = your_pool_data.total_weighted_stake;
+        let user_total_weighted_stake = your_pool_data.user_total_weighted_stake;
         let user_weighted_stake = user_storage_data.user_weighted_stake;
         let unclaimed_epochs =
             ((now - user_storage_data.user_weighted_epoch) / your_pool_data.epoch_duration_in_slots) as u64;
@@ -117,7 +117,7 @@ pub fn process_claim_rewards(accounts: &[AccountInfo], program_id: &Pubkey) -> P
                 max_reward_rate,
                 utils::max(
                     min_reward_rate,
-                    rewards_per_slot as f64 * your_pool_data.epoch_duration_in_slots as f64 / total_weighted_stake as f64,
+                    rewards_per_slot as f64 * your_pool_data.epoch_duration_in_slots as f64 / user_total_weighted_stake as f64,
                 ),
             );
 

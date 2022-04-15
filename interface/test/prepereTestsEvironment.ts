@@ -14,7 +14,7 @@ const yourRewardsVault: Keypair = Keypair.generate();
 
 const walletAccount: Keypair = Keypair.generate();
 
-const rewardDurationInDays: number = 1 / 86400;
+const rewardDurationInDays: number = 100;
 const yourDecimals = 9;
 const rewardTokenDecimals = 9;
 

@@ -17,13 +17,13 @@ export class YourPoolData {
   userStakeCount: BN;
   userTotalStake: BN;
 
-  epochDuration: BN;
+  epochDurationInSlots: BN;
   rewardPerSlot: BN;
   maxRewardRate: BN;
   minRewardRate: BN;
   
-  weightedEpochId: BN;
-  totalWeightedStake: BN;
+  poolInitSlot: BN;
+  userTotalWeightedStake: BN;
 
   constructor(args: {
     accountType: number;
@@ -35,13 +35,13 @@ export class YourPoolData {
     userStakeCount: BN;
     userTotalStake: BN;
   
-    epochDuration: BN;
+    epochDurationInSlots: BN;
     rewardPerSlot: BN;
     maxRewardRate: BN;
     minRewardRate: BN;
     
-    weightedEpochId: BN;
-    totalWeightedStake: BN;
+    poolInitSlot: BN;
+    userTotalWeightedStake: BN;
   }) {
     this.accountType = args.accountType;
     this.pdaNonce = args.pdaNonce;
@@ -52,13 +52,13 @@ export class YourPoolData {
     this.userStakeCount = args.userStakeCount;
     this.userTotalStake = args.userTotalStake;
 
-    this.epochDuration = args.epochDuration;
+    this.epochDurationInSlots = args.epochDurationInSlots;
     this.rewardPerSlot = args.rewardPerSlot;
     this.maxRewardRate = args.maxRewardRate;
     this.minRewardRate = args.minRewardRate;
 
-    this.weightedEpochId = args.weightedEpochId;
-    this.totalWeightedStake = args.totalWeightedStake;
+    this.poolInitSlot = args.poolInitSlot;
+    this.userTotalWeightedStake = args.userTotalWeightedStake;
   }
 
   getAuthorityPubkey(): PublicKey {
@@ -94,7 +94,7 @@ export class YourPoolData {
   }
 }
 
-export const YOUR_POOL_STORAGE_TOTAL_BYTES = 126;
+export const YOUR_POOL_STORAGE_TOTAL_BYTES = 1 + 1 + 32 + 32 + 4 + 8 + 8 + 8 + 8 + 8 + 8 + 8; // 126
 
 export const YOUR_POOL_DATA_ON_CHAIN_SCHEMA = new Map<any, any>([
   [
@@ -110,14 +110,13 @@ export const YOUR_POOL_DATA_ON_CHAIN_SCHEMA = new Map<any, any>([
 
         ['userStakeCount', 'u32'],
         ['userTotalStake', 'u64'],
+        ['userTotalWeightedStake', 'u64'],
         
-        ['epochDuration', 'u64'],
+        ['poolInitSlot', 'u64'],
+        ['epochDurationInSlots', 'u64'],
         ['rewardPerSlot', 'u64'],
         ['maxRewardRate', 'u64'],
         ['minRewardRate', 'u64'],
-        
-        ['weightedEpochId', 'u64'],
-        ['totalWeightedStake', 'u64'],
       ],
     },
   ],

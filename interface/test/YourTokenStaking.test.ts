@@ -102,7 +102,7 @@ describe('Your Token Staking Tests', () => {
         const finalUnstakeYourTx = await finalUnstakeYourTransaction(
             walletAccount.publicKey,
         );
-        await timeout(4_000);
+        await timeout(1_000);
         await sendAndConfirmTransaction(connection, finalUnstakeYourTx, [walletAccount]);
     });
 

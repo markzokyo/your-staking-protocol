@@ -1,13 +1,12 @@
 use borsh::{BorshDeserialize, BorshSerialize};
 use solana_program::pubkey::Pubkey;
-use std::mem;
 
 pub enum AccTypesWithVersion {
     YourPoolDataV1 = 2,
     UserDataV1 = 3,
 }
 
-pub const YOUR_POOL_STORAGE_TOTAL_BYTES: usize = mem::size_of::<YourPool>(); // Should be 2 bytes less than real size of
+pub const YOUR_POOL_STORAGE_TOTAL_BYTES: usize = 126; // Should be 2 bytes less than real size of
 #[derive(Clone, BorshDeserialize, BorshSerialize, Copy)]
 pub struct YourPool {
     pub acc_type: u8,
@@ -18,9 +17,7 @@ pub struct YourPool {
 
     pub user_stake_count: u32,
     pub user_total_stake: u64,
-
-    pub weighted_epoch_id: i64,
-    pub total_weighted_stake: f64,
+    pub user_total_weighted_stake: f64,
 
     pub pool_init_slot: u64,
     pub epoch_duration_in_slots: u64,
@@ -29,7 +26,7 @@ pub struct YourPool {
     pub min_reward_rate: u64,
 }
 
-pub const USER_STORAGE_TOTAL_BYTES: usize = mem::size_of::<User>();//114;
+pub const USER_STORAGE_TOTAL_BYTES: usize = 114;
 #[derive(Clone, BorshDeserialize, BorshSerialize, Copy)]
 pub struct User {
     pub acc_type: u8,

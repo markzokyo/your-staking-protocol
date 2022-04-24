@@ -21,7 +21,7 @@ export class UserData {
 
     userWeightedEpoch: BN;
     userWeightedStake: BN;
-    balanceYourStaked: BN;
+    userStake: BN;
 
     constructor(args: {
         accountType: number;
@@ -37,7 +37,7 @@ export class UserData {
     
         userWeightedEpoch: BN;
         userWeightedStake: BN;
-        balanceYourStaked: BN;
+        userStake: BN;
     }) {
         this.accountType = args.accountType;
         this.nonce = args.nonce;
@@ -48,7 +48,7 @@ export class UserData {
         this.claimTimeoutDate = args.claimTimeoutDate;
         this.userWeightedEpoch = args.userWeightedEpoch;
         this.userWeightedStake = args.userWeightedStake;
-        this.balanceYourStaked = args.balanceYourStaked;
+        this.userStake = args.userStake;
     }
 
     getUserWalletPubkey(): PublicKey {
@@ -60,7 +60,7 @@ export class UserData {
     }
 
     getBalanceStaked(): number {
-        return this.balanceYourStaked.div(new BN(Constants.toYourRaw)).toNumber();
+        return this.userStake.div(new BN(Constants.toYourRaw)).toNumber();
     }
 
     getNonce(): number {
@@ -101,7 +101,7 @@ export const USER_STORAGE_DATA_ON_CHAIN_SCHEMA = new Map<any, any>([
                 ['claimTimeoutDate', 'u64'],
                 ['userWeightedEpoch', 'u64'],
                 ['userWeightedStake', 'u64'],
-                ['balanceYourStaked', 'u64'],
+                ['userStake', 'u64'],
             ],
         },
     ],

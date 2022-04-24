@@ -5,6 +5,7 @@ import { ConnectionService, SolanaNet } from '../src/config';
 import { createInitializePoolTransaction, createUpdateRatesTransaction } from './transactions';
 import { Pubkeys, Constants } from './constants';
 import { YourPoolData, UserData } from './models';
+import { getUserStorageAccountWithNonce } from './utils';
 
 export function getKeyPair(pathToPrivateKeyFile: string): Keypair {
   const privateKey = JSON.parse(
@@ -86,8 +87,9 @@ let get_pool_state = async (poolStorage: PublicKey) => {
   console.info(yourPoolData);
 }
 
-let get_user_state = async (userStorage: PublicKey) => {
-  let userPoolData = await UserData.fromAccount(userStorage);
+let get_user_state = async (user: PublicKey) => {
+  let userStorage = await getUserStorageAccountWithNonce(user);
+  let userPoolData = await UserData.fromAccount(userStorage[0]);
   if (userPoolData == null) {
     throw new Error("User does not exist");
   }

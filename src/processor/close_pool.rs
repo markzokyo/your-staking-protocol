@@ -3,8 +3,6 @@ use crate::{
     state::{AccTypesWithVersion, YourPool, YOUR_POOL_STORAGE_TOTAL_BYTES},
 };
 
-
-
 use borsh::{BorshDeserialize, BorshSerialize};
 use solana_program::{
     account_info::{next_account_info, AccountInfo},
@@ -72,8 +70,7 @@ pub fn process_close_pool(accounts: &[AccountInfo], program_id: &Pubkey) -> Prog
         return Err(CustomError::InvalidStakingVault.into());
     }
 
-    if your_pool_data.user_stake_count != 0u32 || staking_vault_data.amount != 0u64
-    {
+    if your_pool_data.user_stake_count != 0u32 || staking_vault_data.amount != 0u64 {
         msg!("CustomError::PoolStillActive");
         return Err(CustomError::PoolStillActive.into());
     }

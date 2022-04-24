@@ -1,6 +1,5 @@
 use std::cell::RefMut;
 
-
 use crate::error::CustomError;
 use solana_program::account_info::AccountInfo;
 use solana_program::program_error::ProgramError;

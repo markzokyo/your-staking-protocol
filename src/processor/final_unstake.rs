@@ -5,7 +5,7 @@ use crate::{
         AccTypesWithVersion, User, YourPool, USER_STORAGE_TOTAL_BYTES,
         YOUR_POOL_STORAGE_TOTAL_BYTES,
     },
-    utils
+    utils,
 };
 
 use borsh::{BorshDeserialize, BorshSerialize};
@@ -112,11 +112,13 @@ pub fn process_final_unstake(accounts: &[AccountInfo], program_id: &Pubkey) -> P
 
     // update total staked for pool once user withdraw his tokens
     your_pool_data.user_total_stake -= user_storage_data.pending_unstake_amount;
-    your_pool_data.user_total_weighted_stake -= utils::min(user_storage_data.pending_unstake_amount as f64, user_storage_data.user_weighted_stake);
+    your_pool_data.user_total_weighted_stake -= utils::min(
+        user_storage_data.pending_unstake_amount as f64,
+        user_storage_data.user_weighted_stake,
+    );
 
     your_pool_data_byte_array[0usize..YOUR_POOL_STORAGE_TOTAL_BYTES]
         .copy_from_slice(&your_pool_data.try_to_vec().unwrap());
-
 
     user_storage_data.pending_unstake_amount = 0u64;
     user_storage_data.pending_unstake_slot = 0u64;

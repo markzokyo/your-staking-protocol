@@ -2,10 +2,10 @@ use crate::{
     error::CustomError,
     processor::create_user::get_user_storage_address_and_bump_seed,
     state::{
-        AccTypesWithVersion, User, YourPool, USER_STORAGE_TOTAL_BYTES,
-        YOUR_POOL_STORAGE_TOTAL_BYTES, REWARD_RATE_PRECISION
+        AccTypesWithVersion, User, YourPool, REWARD_RATE_PRECISION, USER_STORAGE_TOTAL_BYTES,
+        YOUR_POOL_STORAGE_TOTAL_BYTES,
     },
-    utils
+    utils,
 };
 
 use borsh::{BorshDeserialize, BorshSerialize};
@@ -99,12 +99,18 @@ pub fn process_unstake(
 
     // update total staked for user
     user_storage_data.user_stake -= amount_to_withdraw;
-    user_storage_data.user_weighted_stake -= utils::min(amount_to_withdraw as f64, user_storage_data.user_weighted_stake);
+    user_storage_data.user_weighted_stake -= utils::min(
+        amount_to_withdraw as f64,
+        user_storage_data.user_weighted_stake,
+    );
 
     user_storage_data.pending_unstake_amount += amount_to_withdraw;
     // user can withdraw tokens after beginning of the next epoch, so that pool total staked is not affected during current epoch
-    let current_epoch = (Clock::get()?.slot - your_pool_data.pool_init_slot) / your_pool_data.epoch_duration_in_slots;
-    user_storage_data.pending_unstake_slot = your_pool_data.pool_init_slot + (current_epoch + 1) * your_pool_data.epoch_duration_in_slots + 1;
+    let current_epoch = (Clock::get()?.slot - your_pool_data.pool_init_slot)
+        / your_pool_data.epoch_duration_in_slots;
+    user_storage_data.pending_unstake_slot = your_pool_data.pool_init_slot
+        + (current_epoch + 1) * your_pool_data.epoch_duration_in_slots
+        + 1;
 
     user_data_byte_array[0usize..USER_STORAGE_TOTAL_BYTES]
         .copy_from_slice(&user_storage_data.try_to_vec().unwrap());

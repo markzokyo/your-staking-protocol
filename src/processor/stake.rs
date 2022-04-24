@@ -129,13 +129,15 @@ pub fn process_stake(
         .ok_or(CustomError::AmountOverflow)?;
 
     let current_slot = Clock::get()?.slot;
-    let current_epoch_coefficient =
-    1.0 - ((current_slot - your_pool_data.pool_init_slot) as f64) / (your_pool_data.epoch_duration_in_slots as f64);
-    
+    let current_epoch_coefficient = 1.0
+        - ((current_slot - your_pool_data.pool_init_slot) as f64)
+            / (your_pool_data.epoch_duration_in_slots as f64);
+
     // For current user
     let user_stake_balance = user_storage_data.user_stake as f64;
     user_storage_data.user_weighted_stake = user_stake_balance * current_epoch_coefficient;
-    user_storage_data.user_weighted_epoch = (current_slot - your_pool_data.pool_init_slot) / your_pool_data.epoch_duration_in_slots;
+    user_storage_data.user_weighted_epoch =
+        (current_slot - your_pool_data.pool_init_slot) / your_pool_data.epoch_duration_in_slots;
 
     // Same for pool
     let pool_total_stake = your_pool_data.user_total_stake as f64;

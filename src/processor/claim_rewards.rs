@@ -2,8 +2,8 @@ use crate::{
     error::CustomError,
     processor::create_user::get_user_storage_address_and_bump_seed,
     state::{
-        AccTypesWithVersion, User, YourPool, USER_STORAGE_TOTAL_BYTES,
-        YOUR_POOL_STORAGE_TOTAL_BYTES, REWARD_RATE_PRECISION
+        AccTypesWithVersion, User, YourPool, REWARD_RATE_PRECISION, USER_STORAGE_TOTAL_BYTES,
+        YOUR_POOL_STORAGE_TOTAL_BYTES,
     },
     utils,
 };
@@ -115,11 +115,13 @@ pub fn process_claim_rewards(accounts: &[AccountInfo], program_id: &Pubkey) -> P
             max_reward_rate,
             utils::max(
                 min_reward_rate,
-                rewards_per_slot as f64 * your_pool_data.epoch_duration_in_slots as f64 / your_pool_data.user_total_weighted_stake as f64,
+                rewards_per_slot as f64 * your_pool_data.epoch_duration_in_slots as f64
+                    / your_pool_data.user_total_weighted_stake as f64,
             ),
         );
 
-    let current_epoch = (current_slot - your_pool_data.pool_init_slot) / your_pool_data.epoch_duration_in_slots;
+    let current_epoch =
+        (current_slot - your_pool_data.pool_init_slot) / your_pool_data.epoch_duration_in_slots;
     if user_storage_data.user_weighted_epoch < current_epoch {
         let unclaimed_epochs = current_epoch - user_storage_data.user_weighted_epoch;
         reward_amount += unclaimed_epochs as f64
@@ -128,7 +130,8 @@ pub fn process_claim_rewards(accounts: &[AccountInfo], program_id: &Pubkey) -> P
                 max_reward_rate,
                 utils::max(
                     min_reward_rate,
-                    rewards_per_slot as f64 * your_pool_data.epoch_duration_in_slots as f64 / your_pool_data.user_total_stake as f64,
+                    rewards_per_slot as f64 * your_pool_data.epoch_duration_in_slots as f64
+                        / your_pool_data.user_total_stake as f64,
                 ),
             );
     }
@@ -158,7 +161,9 @@ pub fn process_claim_rewards(accounts: &[AccountInfo], program_id: &Pubkey) -> P
     )?;
 
     // next claim is available at first slot of the next epoch
-    user_storage_data.claim_timeout_slot = your_pool_data.pool_init_slot + (current_epoch + 1) * your_pool_data.epoch_duration_in_slots + 1;
+    user_storage_data.claim_timeout_slot = your_pool_data.pool_init_slot
+        + (current_epoch + 1) * your_pool_data.epoch_duration_in_slots
+        + 1;
 
     your_pool_data_byte_array[0usize..YOUR_POOL_STORAGE_TOTAL_BYTES]
         .copy_from_slice(&your_pool_data.try_to_vec().unwrap());

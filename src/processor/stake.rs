@@ -119,8 +119,8 @@ pub fn process_stake(
         ],
     )?;
 
-    user_storage_data.balance_your_staked = user_storage_data
-        .balance_your_staked
+    user_storage_data.user_stake = user_storage_data
+        .user_stake
         .checked_add(amount_to_deposit)
         .ok_or(CustomError::AmountOverflow)?;
     your_pool_data.user_total_stake = your_pool_data
@@ -133,7 +133,7 @@ pub fn process_stake(
     1.0 - ((current_slot - your_pool_data.pool_init_slot) as f64) / (your_pool_data.epoch_duration_in_slots as f64);
     
     // For current user
-    let user_stake_balance = user_storage_data.balance_your_staked as f64;
+    let user_stake_balance = user_storage_data.user_stake as f64;
     user_storage_data.user_weighted_stake = user_stake_balance * current_epoch_coefficient;
     user_storage_data.user_weighted_epoch = (current_slot - your_pool_data.pool_init_slot) / your_pool_data.epoch_duration_in_slots;
 

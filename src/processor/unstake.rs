@@ -3,8 +3,9 @@ use crate::{
     processor::create_user::get_user_storage_address_and_bump_seed,
     state::{
         AccTypesWithVersion, User, YourPool, USER_STORAGE_TOTAL_BYTES,
-        YOUR_POOL_STORAGE_TOTAL_BYTES,
+        YOUR_POOL_STORAGE_TOTAL_BYTES, REWARD_RATE_PRECISION
     },
+    utils
 };
 
 use borsh::{BorshDeserialize, BorshSerialize};
@@ -61,7 +62,7 @@ pub fn process_unstake(
         return Err(CustomError::DataSizeNotMatched.into());
     }
     let mut your_pool_data_byte_array = your_pool_storage_account.data.try_borrow_mut().unwrap();
-    let your_pool_data: YourPool =
+    let mut your_pool_data: YourPool =
         YourPool::try_from_slice(&your_pool_data_byte_array[0usize..YOUR_POOL_STORAGE_TOTAL_BYTES])
             .unwrap();
     if your_pool_data.acc_type != AccTypesWithVersion::YourPoolDataV1 as u8 {
@@ -91,25 +92,24 @@ pub fn process_unstake(
         return Err(CustomError::UserPoolMismatched.into());
     }
 
-    if user_storage_data.balance_your_staked < amount_to_withdraw {
+    if user_storage_data.user_stake < amount_to_withdraw {
         msg!("CustomError::InsufficientFundsToUnstake");
         return Err(CustomError::InsufficientFundsToUnstake.into());
     }
 
-    
-    let current_slot = Clock::get()?.slot;
-    user_storage_data.user_weighted_stake -= user_storage_data.pending_unstake_amount as f64
-        * (1.0 - ((current_slot - your_pool_data.pool_init_slot) as f64) / (your_pool_data.epoch_duration_in_slots as f64));
+    // update total staked for user
+    user_storage_data.user_stake -= amount_to_withdraw;
+    user_storage_data.user_weighted_stake -= utils::min(amount_to_withdraw as f64, user_storage_data.user_weighted_stake);
 
-    user_storage_data.balance_your_staked -= amount_to_withdraw;
     user_storage_data.pending_unstake_amount += amount_to_withdraw;
-    user_storage_data.pending_unstake_slot = Clock::get()?.slot + 1; // pending for 120 for testing slots ~60 seconds
-    msg!("Moved amount to pending");
+    // user can withdraw tokens after beginning of the next epoch, so that pool total staked is not affected during current epoch
+    let current_epoch = (Clock::get()?.slot - your_pool_data.pool_init_slot) / your_pool_data.epoch_duration_in_slots;
+    user_storage_data.pending_unstake_slot = your_pool_data.pool_init_slot + (current_epoch + 1) * your_pool_data.epoch_duration_in_slots + 1;
 
-    your_pool_data_byte_array[0usize..YOUR_POOL_STORAGE_TOTAL_BYTES]
-        .copy_from_slice(&your_pool_data.try_to_vec().unwrap());
     user_data_byte_array[0usize..USER_STORAGE_TOTAL_BYTES]
         .copy_from_slice(&user_storage_data.try_to_vec().unwrap());
+    your_pool_data_byte_array[0usize..YOUR_POOL_STORAGE_TOTAL_BYTES]
+        .copy_from_slice(&your_pool_data.try_to_vec().unwrap());
 
     Ok(())
 }

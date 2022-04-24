@@ -81,7 +81,7 @@ pub fn process_create_user(
         acc_type: state::AccTypesWithVersion::UserDataV1 as u8,
         user_wallet: *user_wallet_account.key,
         your_pool: *your_pool_storage_account.key,
-        balance_your_staked: 0u64,
+        user_stake: 0u64,
         pending_unstake_amount: 0u64,
         pending_unstake_slot: 0u64,
         nonce: bump_seed,

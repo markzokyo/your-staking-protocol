@@ -29,7 +29,7 @@ use spl_token::state::Account as TokenAccount;
 /// 8. `[]` Token Program
 pub fn process_initialize_your_pool(
     accounts: &[AccountInfo],
-    reward_duration: u64,
+    epoch_duration_in_slots: u64,
     pool_nonce: u8,
     fund_pool: u64,
     program_id: &Pubkey,
@@ -176,7 +176,7 @@ pub fn process_initialize_your_pool(
     your_pool_data.user_total_weighted_stake = 0f64;
 
     your_pool_data.pool_init_slot = Clock::get()?.slot;
-    your_pool_data.epoch_duration_in_slots = reward_duration;
+    your_pool_data.epoch_duration_in_slots = epoch_duration_in_slots;
     your_pool_data.rewards_per_slot = 0u64;
     your_pool_data.max_reward_rate = 0u64;
     your_pool_data.min_reward_rate = 0u64;

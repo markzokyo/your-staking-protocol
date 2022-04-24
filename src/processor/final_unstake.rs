@@ -5,6 +5,7 @@ use crate::{
         AccTypesWithVersion, User, YourPool, USER_STORAGE_TOTAL_BYTES,
         YOUR_POOL_STORAGE_TOTAL_BYTES,
     },
+    utils
 };
 
 use borsh::{BorshDeserialize, BorshSerialize};
@@ -53,7 +54,7 @@ pub fn process_final_unstake(accounts: &[AccountInfo], program_id: &Pubkey) -> P
         return Err(CustomError::DataSizeNotMatched.into());
     }
     let mut your_pool_data_byte_array = your_pool_storage_account.data.try_borrow_mut().unwrap();
-    let your_pool_data: YourPool =
+    let mut your_pool_data: YourPool =
         YourPool::try_from_slice(&your_pool_data_byte_array[0usize..YOUR_POOL_STORAGE_TOTAL_BYTES])
             .unwrap();
     if your_pool_data.acc_type != AccTypesWithVersion::YourPoolDataV1 as u8 {
@@ -109,14 +110,17 @@ pub fn process_final_unstake(accounts: &[AccountInfo], program_id: &Pubkey) -> P
         &[&[&your_pool_storage_account.key.to_bytes(), &[bump_seed]]],
     )?;
 
-    user_storage_data.balance_your_staked = user_storage_data
-        .balance_your_staked
-        .checked_sub(user_storage_data.pending_unstake_amount)
-        .ok_or(CustomError::AmountOverflow)?;
+    // update total staked for pool once user withdraw his tokens
+    your_pool_data.user_total_stake -= user_storage_data.pending_unstake_amount;
+    your_pool_data.user_total_weighted_stake -= utils::min(user_storage_data.pending_unstake_amount as f64, user_storage_data.user_weighted_stake);
 
-    user_storage_data.pending_unstake_amount = 0u64;
     your_pool_data_byte_array[0usize..YOUR_POOL_STORAGE_TOTAL_BYTES]
         .copy_from_slice(&your_pool_data.try_to_vec().unwrap());
+
+
+    user_storage_data.pending_unstake_amount = 0u64;
+    user_storage_data.pending_unstake_slot = 0u64;
+
     user_data_byte_array[0usize..USER_STORAGE_TOTAL_BYTES]
         .copy_from_slice(&user_storage_data.try_to_vec().unwrap());
 

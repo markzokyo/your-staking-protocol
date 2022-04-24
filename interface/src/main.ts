@@ -53,14 +53,14 @@ const yourRewardsVault: Keypair = getYourRewardsVault();
 ConnectionService.setNet(SolanaNet.DEVNET);
 const connection = ConnectionService.getConnection();
 
-let initialize_pool = async (reward_duration: number, reward_pool: number) => {
-  console.debug("initialize_pool", reward_duration, reward_pool);
+let initialize_pool = async (epoch_duration_in_slots: number, reward_pool: number) => {
+  console.debug("initialize_pool", epoch_duration_in_slots, reward_pool);
   const initializePoolTx = await createInitializePoolTransaction(
     adminAccount.publicKey,
     yourPoolStorageAccount,
     yourStakingVault,
     yourRewardsVault,
-    reward_duration,
+    epoch_duration_in_slots,
     reward_pool * Constants.toYourRaw
   );
   console.debug("awaiting transaction", initializePoolTx);
@@ -112,7 +112,7 @@ if (require.main === module) {
   switch (process.argv[2]) {
     case "initialize_pool": {
       if (process.argv.length < 5) {
-        throw "signature mismatch; initialize_pool(reward_duration: number, reward_pool: number)";
+        throw "signature mismatch; initialize_pool(epoch_duration_in_slots: number, reward_pool: number)";
       }
 
       initialize_pool(Number.parseInt(process.argv[3]), Number.parseInt(process.argv[4]))

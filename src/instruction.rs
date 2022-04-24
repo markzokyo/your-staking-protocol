@@ -3,7 +3,7 @@ use solana_program::program_error::ProgramError;
 use std::convert::TryInto;
 pub enum Instruction {
     InitializePool {
-        reward_duration: u64,
+        epoch_duration_in_slots: u64,
         pool_nonce: u8,
         fund_amount: u64,
     },
@@ -31,7 +31,7 @@ impl Instruction {
     pub fn unpack(input: &[u8]) -> Result<Self, ProgramError> {
         Ok(match input[0] {
             0 => Self::InitializePool {
-                reward_duration: Self::unpack_to_u64(&input[1..9])?,
+                epoch_duration_in_slots: Self::unpack_to_u64(&input[1..9])?,
                 pool_nonce: input[9],
                 fund_amount: Self::unpack_to_u64(&input[10..18])?,
             },

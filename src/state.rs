@@ -6,6 +6,8 @@ pub enum AccTypesWithVersion {
     UserDataV1 = 3,
 }
 
+pub const REWARD_RATE_PRECISION: f64 = 1000000000.0;
+
 pub const YOUR_POOL_STORAGE_TOTAL_BYTES: usize = 126; // Should be 2 bytes less than real size of
 #[derive(Clone, BorshDeserialize, BorshSerialize, Copy)]
 pub struct YourPool {
@@ -42,5 +44,5 @@ pub struct User {
 
     pub user_weighted_epoch: u64,
     pub user_weighted_stake: f64,
-    pub balance_your_staked: u64,
+    pub user_stake: u64,
 }

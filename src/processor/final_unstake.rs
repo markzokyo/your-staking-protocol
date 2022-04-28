@@ -116,6 +116,10 @@ pub fn process_final_unstake(accounts: &[AccountInfo], program_id: &Pubkey) -> P
         user_storage_data.pending_unstake_amount as f64,
         user_storage_data.user_weighted_stake,
     );
+    if user_storage_data.user_weighted_stake == 0.0 {
+        user_storage_data.user_weighted_epoch = 0u64;
+    }
+
 
     your_pool_data_byte_array[0usize..YOUR_POOL_STORAGE_TOTAL_BYTES]
         .copy_from_slice(&your_pool_data.try_to_vec().unwrap());

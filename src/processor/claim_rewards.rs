@@ -160,6 +160,10 @@ pub fn process_claim_rewards(accounts: &[AccountInfo], program_id: &Pubkey) -> P
         &[&[&your_pool_storage_account.key.to_bytes(), &[bump_seed]]],
     )?;
 
+    // wipe weighted stats for user (as he cleared them)
+    user_storage_data.user_weighted_epoch = current_epoch;
+    user_storage_data.user_weighted_stake = 0f64;
+
     // next claim is available at first slot of the next epoch
     user_storage_data.claim_timeout_slot = your_pool_data.pool_init_slot
         + (current_epoch + 1) * your_pool_data.epoch_duration_in_slots

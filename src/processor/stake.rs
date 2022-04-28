@@ -129,19 +129,22 @@ pub fn process_stake(
         .ok_or(CustomError::AmountOverflow)?;
 
     let current_slot = Clock::get()?.slot;
-    let current_epoch_coefficient = 1.0
-        - ((current_slot - your_pool_data.pool_init_slot) as f64)
-            / (your_pool_data.epoch_duration_in_slots as f64);
+    let current_epoch_coefficient = 1.0f64
+        - (((current_slot - your_pool_data.pool_init_slot) % your_pool_data.epoch_duration_in_slots)
+            as f64
+            / your_pool_data.epoch_duration_in_slots as f64);
 
     // For current user
-    let user_stake_balance = user_storage_data.user_stake as f64;
-    user_storage_data.user_weighted_stake = user_stake_balance * current_epoch_coefficient;
-    user_storage_data.user_weighted_epoch =
-        (current_slot - your_pool_data.pool_init_slot) / your_pool_data.epoch_duration_in_slots;
+    let weighted_amount_to_deposit = amount_to_deposit as f64 * current_epoch_coefficient;
+
+    user_storage_data.user_weighted_stake += weighted_amount_to_deposit;
+    if user_storage_data.user_weighted_epoch == 0 {
+        user_storage_data.user_weighted_epoch =
+            (current_slot - your_pool_data.pool_init_slot) / your_pool_data.epoch_duration_in_slots;
+    }
 
     // Same for pool
-    let pool_total_stake = your_pool_data.user_total_stake as f64;
-    your_pool_data.user_total_weighted_stake = pool_total_stake * current_epoch_coefficient;
+    your_pool_data.user_total_weighted_stake += weighted_amount_to_deposit;
 
     your_pool_data_byte_array[0usize..YOUR_POOL_STORAGE_TOTAL_BYTES]
         .copy_from_slice(&your_pool_data.try_to_vec().unwrap());

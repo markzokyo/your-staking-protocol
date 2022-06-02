@@ -21,5 +21,5 @@ export async function getUserPendingRewards(userWallet: PublicKey): Promise<numb
     }
     console.log('userData', userData);
 
-    return userData.unstakePending.toNumber();
+    return userData.unstakePendingAmount.toNumber();
 }

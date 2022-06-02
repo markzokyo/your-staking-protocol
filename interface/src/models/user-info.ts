@@ -9,46 +9,46 @@ import { Constants } from '../constants';
 
 export class UserData {
     accountType: number;
+    nonce: number;
 
     userWallet: StringPublicKey;
     yourPool: StringPublicKey;
 
-    unstakePending: BN;
-    unstakePendingDate: BN;
+    unstakePendingAmount: BN;
+    unstakePendingSlot: BN;
 
-    nonce: number;
     claimTimeoutDate: BN;
 
     userWeightedEpoch: BN;
     userWeightedStake: BN;
-    balanceYourStaked: BN;
+    userStake: BN;
 
     constructor(args: {
         accountType: number;
+        nonce: number;
     
         userWallet: StringPublicKey;
         yourPool: StringPublicKey;
     
-        unstakePending: BN;
-        unstakePendingDate: BN;
+        unstakePendingAmount: BN;
+        unstakePendingSlot: BN;
     
-        nonce: number;
         claimTimeoutDate: BN;
     
         userWeightedEpoch: BN;
         userWeightedStake: BN;
-        balanceYourStaked: BN;
+        userStake: BN;
     }) {
         this.accountType = args.accountType;
+        this.nonce = args.nonce;
         this.userWallet = args.userWallet;
         this.yourPool = args.yourPool;
-        this.unstakePending = args.unstakePending;
-        this.unstakePendingDate = args.unstakePendingDate;
-        this.nonce = args.nonce;
+        this.unstakePendingAmount = args.unstakePendingAmount;
+        this.unstakePendingSlot = args.unstakePendingSlot;
         this.claimTimeoutDate = args.claimTimeoutDate;
         this.userWeightedEpoch = args.userWeightedEpoch;
         this.userWeightedStake = args.userWeightedStake;
-        this.balanceYourStaked = args.balanceYourStaked;
+        this.userStake = args.userStake;
     }
 
     getUserWalletPubkey(): PublicKey {
@@ -60,7 +60,7 @@ export class UserData {
     }
 
     getBalanceStaked(): number {
-        return this.balanceYourStaked.div(new BN(Constants.toYourRaw)).toNumber();
+        return this.userStake.div(new BN(Constants.toYourRaw)).toNumber();
     }
 
     getNonce(): number {
@@ -84,7 +84,7 @@ export class UserData {
     }
 }
 
-export const USER_STORAGE_TOTAL_BYTES = 114;
+export const USER_STORAGE_TOTAL_BYTES = 1 + 1 + 32 + 32 + 8 + 8 + 8 + 8 + 8 + 8; // 114
 
 export const USER_STORAGE_DATA_ON_CHAIN_SCHEMA = new Map<any, any>([
     [
@@ -93,15 +93,15 @@ export const USER_STORAGE_DATA_ON_CHAIN_SCHEMA = new Map<any, any>([
             kind: 'struct',
             fields: [
                 ['accountType', 'u8'],
+                ['nonce', 'u8'],
                 ['userWallet', 'pubkeyAsString'],
                 ['yourPool', 'pubkeyAsString'],
-                ['unstakePending', 'u64'],
-                ['unstakePendingDate', 'u64'],
-                ['nonce', 'u8'],
+                ['unstakePendingAmount', 'u64'],
+                ['unstakePendingSlot', 'u64'],
                 ['claimTimeoutDate', 'u64'],
                 ['userWeightedEpoch', 'u64'],
                 ['userWeightedStake', 'u64'],
-                ['balanceYourStaked', 'u64'],
+                ['userStake', 'u64'],
             ],
         },
     ],

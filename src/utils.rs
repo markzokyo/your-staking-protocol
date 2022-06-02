@@ -1,6 +1,5 @@
 use std::cell::RefMut;
 
-
 use crate::error::CustomError;
 use solana_program::account_info::AccountInfo;
 use solana_program::program_error::ProgramError;
@@ -27,7 +26,7 @@ pub fn close_account(
 }
 
 pub fn earned(
-    balance_your_staked: u64,
+    user_stake: u64,
     reward_per_token_stored: u128,
     reward_per_token_complete: u128,
     reward_per_token_pending: u64,
@@ -35,7 +34,7 @@ pub fn earned(
     let diff_reward_per_token = reward_per_token_stored
         .checked_sub(reward_per_token_complete)
         .ok_or(CustomError::AmountOverflow)?;
-    let mul = ((balance_your_staked as u128)
+    let mul = ((user_stake as u128)
         .checked_mul(diff_reward_per_token)
         .ok_or(CustomError::AmountOverflow)?)
     .checked_div(PRECISION)
@@ -43,7 +42,7 @@ pub fn earned(
     let updated_reward_per_token_pending = reward_per_token_pending
         .checked_add(mul)
         .ok_or(CustomError::AmountOverflow)?;
-    return Ok(updated_reward_per_token_pending);
+    Ok(updated_reward_per_token_pending)
 }
 
 pub fn min(f1: f64, f2: f64) -> f64 {

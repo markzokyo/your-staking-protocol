@@ -5,6 +5,7 @@ use crate::{
         AccTypesWithVersion, User, YourPool, USER_STORAGE_TOTAL_BYTES,
         YOUR_POOL_STORAGE_TOTAL_BYTES,
     },
+    utils,
 };
 
 use borsh::{BorshDeserialize, BorshSerialize};
@@ -27,7 +28,7 @@ pub fn process_unstake(
     let user_wallet_account = next_account_info(account_info_iter)?;
     let user_storage_account = next_account_info(account_info_iter)?;
     let your_pool_storage_account = next_account_info(account_info_iter)?;
-    let _your_staking_vault = next_account_info(account_info_iter)?;
+    let _staking_vault = next_account_info(account_info_iter)?;
     let _user_your_ata = next_account_info(account_info_iter)?;
     let _pool_signer_pda = next_account_info(account_info_iter)?;
     let token_program = next_account_info(account_info_iter)?;
@@ -91,21 +92,30 @@ pub fn process_unstake(
         return Err(CustomError::UserPoolMismatched.into());
     }
 
-    if user_storage_data.balance_your_staked < amount_to_withdraw {
+    if user_storage_data.user_stake < amount_to_withdraw {
         msg!("CustomError::InsufficientFundsToUnstake");
         return Err(CustomError::InsufficientFundsToUnstake.into());
     }
 
-    let now = Clock::get()?.unix_timestamp as i64;
+    // update total staked for user
+    user_storage_data.user_stake -= amount_to_withdraw;
+    user_storage_data.user_weighted_stake -= utils::min(
+        amount_to_withdraw as f64,
+        user_storage_data.user_weighted_stake,
+    );
 
-    user_storage_data.unstake_pending = amount_to_withdraw;
-    user_storage_data.unstake_pending_date = now + 2; // pending for 2 seconds
-    msg!("Moved amount to pending");
+    user_storage_data.pending_unstake_amount += amount_to_withdraw;
+    // user can withdraw tokens after beginning of the next epoch, so that pool total staked is not affected during current epoch
+    let current_epoch = (Clock::get()?.slot - your_pool_data.pool_init_slot)
+        / your_pool_data.epoch_duration_in_slots;
+    user_storage_data.pending_unstake_slot = your_pool_data.pool_init_slot
+        + (current_epoch + 1) * your_pool_data.epoch_duration_in_slots
+        + 1;
 
-    your_pool_data_byte_array[0usize..YOUR_POOL_STORAGE_TOTAL_BYTES]
-        .copy_from_slice(&your_pool_data.try_to_vec().unwrap());
     user_data_byte_array[0usize..USER_STORAGE_TOTAL_BYTES]
         .copy_from_slice(&user_storage_data.try_to_vec().unwrap());
+    your_pool_data_byte_array[0usize..YOUR_POOL_STORAGE_TOTAL_BYTES]
+        .copy_from_slice(&your_pool_data.try_to_vec().unwrap());
 
     Ok(())
 }

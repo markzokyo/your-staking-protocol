@@ -5,6 +5,7 @@ import { ConnectionService, SolanaNet } from '../src/config';
 import { createInitializePoolTransaction, createUpdateRatesTransaction } from './transactions';
 import { Pubkeys, Constants } from './constants';
 import { YourPoolData, UserData } from './models';
+import { getUserStorageAccountWithNonce } from './utils';
 
 export function getKeyPair(pathToPrivateKeyFile: string): Keypair {
   const privateKey = JSON.parse(
@@ -53,14 +54,14 @@ const yourRewardsVault: Keypair = getYourRewardsVault();
 ConnectionService.setNet(SolanaNet.DEVNET);
 const connection = ConnectionService.getConnection();
 
-let initialize_pool = async (reward_duration: number, reward_pool: number) => {
-  console.debug("initialize_pool", reward_duration, reward_pool);
+let initialize_pool = async (epoch_duration_in_slots: number, reward_pool: number) => {
+  console.debug("initialize_pool", epoch_duration_in_slots, reward_pool);
   const initializePoolTx = await createInitializePoolTransaction(
     adminAccount.publicKey,
     yourPoolStorageAccount,
     yourStakingVault,
     yourRewardsVault,
-    reward_duration,
+    epoch_duration_in_slots,
     reward_pool * Constants.toYourRaw
   );
   console.debug("awaiting transaction", initializePoolTx);
@@ -86,8 +87,9 @@ let get_pool_state = async (poolStorage: PublicKey) => {
   console.info(yourPoolData);
 }
 
-let get_user_state = async (userStorage: PublicKey) => {
-  let userPoolData = await UserData.fromAccount(userStorage);
+let get_user_state = async (user: PublicKey) => {
+  let userStorage = await getUserStorageAccountWithNonce(user);
+  let userPoolData = await UserData.fromAccount(userStorage[0]);
   if (userPoolData == null) {
     throw new Error("User does not exist");
   }
@@ -103,13 +105,16 @@ if (require.main === module) {
   Pubkeys.yourPoolStoragePubkey = yourPoolStorageAccount.publicKey;
   Pubkeys.yourStakingVaultPubkey = yourStakingVault.publicKey;
   Pubkeys.yourRewardsVaultPubkey = yourRewardsVault.publicKey;
+  for (const [key, value] of Object.entries(Pubkeys)) {
+    console.log(`${key}: ${value}`);
+  }
 
   console.debug(process.argv);
 
   switch (process.argv[2]) {
     case "initialize_pool": {
       if (process.argv.length < 5) {
-        throw "signature mismatch; initialize_pool(reward_duration: number, reward_pool: number)";
+        throw "signature mismatch; initialize_pool(epoch_duration_in_slots: number, reward_pool: number)";
       }
 
       initialize_pool(Number.parseInt(process.argv[3]), Number.parseInt(process.argv[4]))

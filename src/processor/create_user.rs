@@ -81,13 +81,13 @@ pub fn process_create_user(
         acc_type: state::AccTypesWithVersion::UserDataV1 as u8,
         user_wallet: *user_wallet_account.key,
         your_pool: *your_pool_storage_account.key,
-        balance_your_staked: 0u64,
-        unstake_pending: 0u64,
-        unstake_pending_date: 0i64,
+        user_stake: 0u64,
+        pending_unstake_amount: 0u64,
+        pending_unstake_slot: 0u64,
         nonce: bump_seed,
-        claim_timeout_date: 0i64,
-        user_weighted_epoch: 0i64,
-        user_weighted_stake: 0f64
+        claim_timeout_slot: 0u64,
+        user_weighted_epoch: 0u64,
+        user_weighted_stake: 0f64,
     };
 
     let mut user_data_byte_array = user_storage_account.data.try_borrow_mut().unwrap();
@@ -166,7 +166,7 @@ pub fn assert_derivation(
     account: &AccountInfo,
     path: &[&[u8]],
 ) -> Result<u8, ProgramError> {
-    let (key, bump) = Pubkey::find_program_address(&path, program_id);
+    let (key, bump) = Pubkey::find_program_address(path, program_id);
     if key != *account.key {
         return Err(CustomError::DerivedKeyInvalid.into());
     }

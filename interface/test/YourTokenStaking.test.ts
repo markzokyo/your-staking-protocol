@@ -1,4 +1,5 @@
 import { ConnectionService } from "../src/config";
+import { Pubkeys } from "../src/constants";
 import {
     createUserTransaction,
     closeUserTransaction,
@@ -28,6 +29,7 @@ describe('Your Token Staking Tests', () => {
 
     beforeAll(async () => {
         await setupEnvironment();
+        console.log("Pubkeys", Pubkeys);
     });
 
     test('Initialize Pool', async () => {
@@ -100,7 +102,7 @@ describe('Your Token Staking Tests', () => {
         const finalUnstakeYourTx = await finalUnstakeYourTransaction(
             walletAccount.publicKey,
         );
-        await timeout(4_000);
+        await timeout(1_000);
         await sendAndConfirmTransaction(connection, finalUnstakeYourTx, [walletAccount]);
     });
 

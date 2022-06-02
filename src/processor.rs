@@ -29,14 +29,14 @@ impl Processor {
         let instruction = Instruction::unpack(instruction_data)?;
         match instruction {
             Instruction::InitializePool {
-                reward_duration,
+                epoch_duration_in_slots,
                 pool_nonce,
                 fund_amount,
             } => {
                 msg!("Instruction::InitializePool");
                 process_initialize_your_pool(
                     accounts,
-                    reward_duration,
+                    epoch_duration_in_slots,
                     pool_nonce,
                     fund_amount,
                     program_id,

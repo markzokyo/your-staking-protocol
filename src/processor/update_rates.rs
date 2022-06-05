@@ -47,3 +47,37 @@ pub fn process_update_rates(
 
     Ok(())
 }
+
+pub fn process_update_unlock_duration(
+    accounts: &[AccountInfo],
+    _program_id: &Pubkey,
+    max_unlock_duration_in_slots: u64,
+    min_unlock_duration_in_slots: u64,
+) -> ProgramResult {
+    let account_info_iter = &mut accounts.iter();
+    let pool_owner_wallet_account = next_account_info(account_info_iter)?;
+    let your_pool_storage_account = next_account_info(account_info_iter)?;
+
+    if !pool_owner_wallet_account.is_signer {
+        msg!("ProgramError::MissingRequiredSignature");
+        return Err(ProgramError::MissingRequiredSignature);
+    }
+
+    let mut your_pool_data_byte_array = your_pool_storage_account.data.try_borrow_mut().unwrap();
+    let mut your_pool_data: YourPool =
+        YourPool::try_from_slice(&your_pool_data_byte_array[0usize..YOUR_POOL_STORAGE_TOTAL_BYTES])
+            .unwrap();
+
+    if your_pool_data.owner_wallet != *pool_owner_wallet_account.key {
+        msg!("CustomError::PoolOwnerMismatched");
+        return Err(CustomError::PoolOwnerMismatched.into());
+    }
+
+    your_pool_data.max_unlock_duration_in_slots = max_unlock_duration_in_slots;
+    your_pool_data.min_unlock_duration_in_slots = min_unlock_duration_in_slots;
+
+    your_pool_data_byte_array[0usize..YOUR_POOL_STORAGE_TOTAL_BYTES]
+        .copy_from_slice(&your_pool_data.try_to_vec().unwrap());
+
+    Ok(())
+}

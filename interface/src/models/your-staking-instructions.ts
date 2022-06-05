@@ -8,4 +8,5 @@ export enum YourStakingInstructions {
   CloseUser = 6,
   FinalUnstake = 7,
   UpdateRates = 8,
+  UpdateDuration = 9,
 }

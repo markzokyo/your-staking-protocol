@@ -6,3 +6,4 @@ export * from './unstake-your-transaction';
 export * from './close-pool-transaction';
 export * from './close-user-transaction';
 export * from './update_rates_transaction';
+export * from './update_lock_duration_transaction';

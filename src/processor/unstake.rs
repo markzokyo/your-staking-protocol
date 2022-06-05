@@ -109,10 +109,13 @@ pub fn process_unstake(
     let current_epoch = (Clock::get()?.slot - your_pool_data.pool_init_slot)
         / your_pool_data.epoch_duration_in_slots;
 
-    let unlock_duration = utils::min( 
-        your_pool_data.max_unlock_duration_in_slots as f64, utils::max(
-            your_pool_data.min_unlock_duration_in_slots as f64, your_pool_data.epoch_duration_in_slots as f64 * amount_to_withdraw as f64 / user_storage_data.pending_unstake_amount as f64
-        )
+    let unlock_duration = utils::min(
+        your_pool_data.max_unlock_duration_in_slots as f64,
+        utils::max(
+            your_pool_data.min_unlock_duration_in_slots as f64,
+            your_pool_data.epoch_duration_in_slots as f64 * amount_to_withdraw as f64
+                / user_storage_data.pending_unstake_amount as f64,
+        ),
     ) as u64;
     user_storage_data.pending_unstake_slot = your_pool_data.pool_init_slot
         + current_epoch * your_pool_data.epoch_duration_in_slots

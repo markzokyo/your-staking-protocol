@@ -181,8 +181,8 @@ pub fn process_initialize_your_pool(
     your_pool_data.max_reward_rate = 0u64;
     your_pool_data.min_reward_rate = 0u64;
 
-    your_pool_data.max_unlock_duration_in_slots = 0u64;
-    your_pool_data.min_unlock_duration_in_slots = 0u64;
+    your_pool_data.max_unlock_duration_in_slots = epoch_duration_in_slots;
+    your_pool_data.min_unlock_duration_in_slots = epoch_duration_in_slots;
 
     your_pool_data_byte_array[0usize..YOUR_POOL_STORAGE_TOTAL_BYTES]
         .copy_from_slice(&your_pool_data.try_to_vec().unwrap());

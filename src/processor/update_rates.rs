@@ -28,6 +28,11 @@ pub fn process_update_rates(
         return Err(ProgramError::MissingRequiredSignature);
     }
 
+    if max_reward_rate < min_reward_rate {
+        msg!("CustomError::MaxLessThanMinRewardRate");
+        return Err(CustomError::MaxLessThanMinRewardRate.into());
+    }
+
     let mut your_pool_data_byte_array = your_pool_storage_account.data.try_borrow_mut().unwrap();
     let mut your_pool_data: YourPool =
         YourPool::try_from_slice(&your_pool_data_byte_array[0usize..YOUR_POOL_STORAGE_TOTAL_BYTES])
@@ -61,6 +66,11 @@ pub fn process_update_unlock_duration(
     if !pool_owner_wallet_account.is_signer {
         msg!("ProgramError::MissingRequiredSignature");
         return Err(ProgramError::MissingRequiredSignature);
+    }
+
+    if max_unlock_duration_in_slots < min_unlock_duration_in_slots {
+        msg!("CustomError::MaxLessThanMinUnlockTime");
+        return Err(CustomError::MaxLessThanMinUnlockTime.into());
     }
 
     let mut your_pool_data_byte_array = your_pool_storage_account.data.try_borrow_mut().unwrap();

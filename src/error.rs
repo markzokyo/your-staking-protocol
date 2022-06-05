@@ -73,6 +73,12 @@ pub enum CustomError {
     // User claim reward amount is Zero
     #[error("User claim reward amount is Zero")]
     UserRewardToClaimIsZero,
+    // Given max reward rate is less than min reward rate
+    #[error("Max reward rate should be greater then min")]
+    MaxLessThanMinRewardRate,
+    // Given max unlock time is less than min unlock time
+    #[error("Max unlock time should be greater then min")]
+    MaxLessThanMinUnlockTime,
 }
 
 impl From<CustomError> for ProgramError {

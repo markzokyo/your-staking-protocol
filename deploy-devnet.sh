@@ -2,12 +2,7 @@
 
 set -e
 
-SOLANA_URL=http://127.0.0.1:8899
-
-solana-test-validator > /dev/null 2>&1 &
-VALIDATOR_PID=$!
-echo "VALIDATOR_PID"
-echo $VALIDATOR_PID
+SOLANA_URL=https://api.devnet.solana.com
 
 while ! curl -X OPTIONS $SOLANA_URL
 do
@@ -28,7 +23,10 @@ PAYER_KEYPAIR_FILE=$ADMIN_KEYPAIR_FILE
 
 
 echo "AIRDROP"
-solana airdrop --commitment confirmed --url $SOLANA_URL --keypair ./$PAYER_KEYPAIR_FILE 4
+solana airdrop --commitment confirmed --url $SOLANA_URL --keypair ./$PAYER_KEYPAIR_FILE 2 # actually needed only 3.8466876
+sleep 3
+solana airdrop --commitment confirmed --url $SOLANA_URL --keypair ./$PAYER_KEYPAIR_FILE 2 # actually needed only 3.8466876
+sleep 3
 solana airdrop --commitment confirmed --url $SOLANA_URL --keypair ./$ADMIN_KEYPAIR_FILE 2
 
 echo "GENERATE PROGRAM ACCOUNT"

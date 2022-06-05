@@ -2,12 +2,7 @@
 
 set -e
 
-SOLANA_URL=http://127.0.0.1:8899
-
-solana-test-validator > /dev/null 2>&1 &
-VALIDATOR_PID=$!
-echo "VALIDATOR_PID"
-echo $VALIDATOR_PID
+SOLANA_URL=https://api.devnet.solana.com
 
 while ! curl -X OPTIONS $SOLANA_URL
 do
@@ -20,16 +15,10 @@ solana config set --keypair $(pwd)/admin-keypair.json
 
 echo "KEY_GEN"
 ADMIN_KEYPAIR_FILE=admin-keypair.json
-yes | solana-keygen new --force --outfile ./$ADMIN_KEYPAIR_FILE
-
 PAYER_KEYPAIR_FILE=$ADMIN_KEYPAIR_FILE
-#yes | solana-keygen new --force --outfile ./$PAYER_KEYPAIR_FILE
-# PAYER_KEYPAIR_FILE=payer-keypair.json
-
-
-echo "AIRDROP"
-solana airdrop --commitment confirmed --url $SOLANA_URL --keypair ./$PAYER_KEYPAIR_FILE 4
-solana airdrop --commitment confirmed --url $SOLANA_URL --keypair ./$ADMIN_KEYPAIR_FILE 2
+if [ ! -f "$ADMIN_KEYPAIR_FILE" ]; then
+    echo "$ADMIN_KEYPAIR_FILE does not exist."
+fi
 
 echo "GENERATE PROGRAM ACCOUNT"
 PROGRAM_KEYPAIR_FILE=program-keypair.json

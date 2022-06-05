@@ -26,8 +26,6 @@ echo "AIRDROP"
 solana airdrop --commitment confirmed --url $SOLANA_URL --keypair ./$PAYER_KEYPAIR_FILE 2 # actually needed only 3.8466876
 sleep 3
 solana airdrop --commitment confirmed --url $SOLANA_URL --keypair ./$PAYER_KEYPAIR_FILE 2 # actually needed only 3.8466876
-sleep 3
-solana airdrop --commitment confirmed --url $SOLANA_URL --keypair ./$ADMIN_KEYPAIR_FILE 2
 
 echo "GENERATE PROGRAM ACCOUNT"
 PROGRAM_KEYPAIR_FILE=program-keypair.json

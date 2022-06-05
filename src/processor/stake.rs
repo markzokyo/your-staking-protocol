@@ -138,9 +138,15 @@ pub fn process_stake(
     let weighted_amount_to_deposit = amount_to_deposit as f64 * current_epoch_coefficient;
 
     user_storage_data.user_weighted_stake += weighted_amount_to_deposit;
-    if user_storage_data.user_weighted_epoch == 0 {
-        user_storage_data.user_weighted_epoch =
+    if user_storage_data.last_claim_epoch == 0u64 {
+        let current_epoch =
             (current_slot - your_pool_data.pool_init_slot) / your_pool_data.epoch_duration_in_slots;
+        user_storage_data.last_claim_epoch = current_epoch;
+
+        let next_epoch_slot = your_pool_data.pool_init_slot
+            + (current_epoch + 1) * your_pool_data.epoch_duration_in_slots
+            + 1;
+        user_storage_data.claim_timeout_slot = next_epoch_slot;
     }
 
     // Same for pool

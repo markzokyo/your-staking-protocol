@@ -122,8 +122,8 @@ pub fn process_claim_rewards(accounts: &[AccountInfo], program_id: &Pubkey) -> P
 
     let current_epoch =
         (current_slot - your_pool_data.pool_init_slot) / your_pool_data.epoch_duration_in_slots;
-    if user_storage_data.user_weighted_epoch < current_epoch {
-        let unclaimed_epochs = current_epoch - user_storage_data.user_weighted_epoch;
+    if user_storage_data.last_claim_epoch < current_epoch {
+        let unclaimed_epochs = current_epoch - user_storage_data.last_claim_epoch;
         reward_amount += unclaimed_epochs as f64
             * user_storage_data.user_stake as f64
             * utils::min(
@@ -161,7 +161,7 @@ pub fn process_claim_rewards(accounts: &[AccountInfo], program_id: &Pubkey) -> P
     )?;
 
     // wipe weighted stats for user (as he cleared them)
-    user_storage_data.user_weighted_epoch = current_epoch;
+    user_storage_data.last_claim_epoch = current_epoch;
     user_storage_data.user_weighted_stake = 0f64;
 
     // next claim is available at first slot of the next epoch

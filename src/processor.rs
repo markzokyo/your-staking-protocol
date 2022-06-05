@@ -4,7 +4,8 @@ use {
     claim_rewards::process_claim_rewards, close_pool::process_close_pool,
     close_user::process_close_user, create_user::process_create_user,
     final_unstake::process_final_unstake, initialize_pool::process_initialize_your_pool,
-    stake::process_stake, unstake::process_unstake, update_rates::process_update_rates, update_rates::process_update_unlock_duration,
+    stake::process_stake, unstake::process_unstake, update_rates::process_update_rates,
+    update_rates::process_update_unlock_duration,
 };
 
 pub mod claim_rewards;

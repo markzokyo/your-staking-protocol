@@ -44,7 +44,7 @@ pub struct User {
 
     pub claim_timeout_slot: u64,
 
-    pub user_weighted_epoch: u64,
+    pub last_claim_epoch: u64,
     pub user_weighted_stake: f64,
     pub user_stake: u64,
 }

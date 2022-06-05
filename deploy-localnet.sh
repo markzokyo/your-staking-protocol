@@ -4,17 +4,6 @@ set -e
 
 SOLANA_URL=http://127.0.0.1:8899
 
-solana-test-validator > /dev/null 2>&1 &
-VALIDATOR_PID=$!
-echo "VALIDATOR_PID"
-echo $VALIDATOR_PID
-
-while ! curl -X OPTIONS $SOLANA_URL
-do
-  echo "Waiting 2 seconds"
-  sleep 2
-done
-
 solana config set --url $SOLANA_URL
 solana config set --keypair $(pwd)/admin-keypair.json
 

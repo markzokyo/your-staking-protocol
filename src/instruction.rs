@@ -25,6 +25,10 @@ pub enum Instruction {
         max_reward_rate: u64,
         min_reward_rate: u64,
     },
+    UpdateDuration {
+        max_lock_slots_in_decimals: u64,
+        min_lock_slots_in_decimals: u64,
+    },
 }
 
 impl Instruction {
@@ -55,6 +59,11 @@ impl Instruction {
                 rewards_per_slot: Self::unpack_to_u64(&input[1..9])?,
                 max_reward_rate: Self::unpack_to_u64(&input[9..17])?,
                 min_reward_rate: Self::unpack_to_u64(&input[17..25])?,
+            },
+
+            9 => Self::UpdateDuration {
+                max_lock_slots_in_decimals: Self::unpack_to_u64(&input[1..9])?,
+                min_lock_slots_in_decimals: Self::unpack_to_u64(&input[9..17])?,
             },
 
             _ => return Err(InvalidInstruction.into()),

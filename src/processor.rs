@@ -4,7 +4,7 @@ use {
     claim_rewards::process_claim_rewards, close_pool::process_close_pool,
     close_user::process_close_user, create_user::process_create_user,
     final_unstake::process_final_unstake, initialize_pool::process_initialize_your_pool,
-    stake::process_stake, unstake::process_unstake, update_rates::process_update_rates,
+    stake::process_stake, unstake::process_unstake, update_rates::process_update_rates, update_rates::process_update_unlock_duration,
 };
 
 pub mod claim_rewards;
@@ -89,6 +89,19 @@ impl Processor {
                     rewards_per_slot,
                     max_reward_rate,
                     min_reward_rate,
+                )
+            }
+
+            Instruction::UpdateDuration {
+                max_lock_slots_in_decimals,
+                min_lock_slots_in_decimals,
+            } => {
+                msg!("Instruction::UpdateDuration");
+                process_update_unlock_duration(
+                    accounts,
+                    program_id,
+                    max_lock_slots_in_decimals,
+                    min_lock_slots_in_decimals,
                 )
             }
         }

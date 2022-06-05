@@ -5,7 +5,6 @@ import BN from 'bn.js';
 import { StringPublicKey } from '../data/ids';
 import { ConnectionService } from '../config';
 import { extendBorsh } from '../data/borsch';
-import { Constants } from '../constants';
 
 export class YourPoolData {
   accountType: number;
@@ -13,17 +12,18 @@ export class YourPoolData {
 
   ownerWallet: StringPublicKey;
   stakingVault: StringPublicKey;
+  userTotalWeightedStake: BN;
 
   userStakeCount: BN;
   userTotalStake: BN;
 
+  poolInitSlot: BN;
   epochDurationInSlots: BN;
   rewardPerSlot: BN;
   maxRewardRate: BN;
   minRewardRate: BN;
-  
-  poolInitSlot: BN;
-  userTotalWeightedStake: BN;
+  maxUnlockDurationInSlots: BN;
+  minUnlockDurationInSlots: BN;
 
   constructor(args: {
     accountType: number;
@@ -34,14 +34,15 @@ export class YourPoolData {
   
     userStakeCount: BN;
     userTotalStake: BN;
+    userTotalWeightedStake: BN;
   
+    poolInitSlot: BN;
     epochDurationInSlots: BN;
     rewardPerSlot: BN;
     maxRewardRate: BN;
     minRewardRate: BN;
-    
-    poolInitSlot: BN;
-    userTotalWeightedStake: BN;
+    maxUnlockDurationInSlots: BN;
+    minUnlockDurationInSlots: BN;
   }) {
     this.accountType = args.accountType;
     this.pdaNonce = args.pdaNonce;
@@ -51,14 +52,15 @@ export class YourPoolData {
 
     this.userStakeCount = args.userStakeCount;
     this.userTotalStake = args.userTotalStake;
+    this.userTotalWeightedStake = args.userTotalWeightedStake;
 
+    this.poolInitSlot = args.poolInitSlot;
     this.epochDurationInSlots = args.epochDurationInSlots;
     this.rewardPerSlot = args.rewardPerSlot;
     this.maxRewardRate = args.maxRewardRate;
     this.minRewardRate = args.minRewardRate;
-
-    this.poolInitSlot = args.poolInitSlot;
-    this.userTotalWeightedStake = args.userTotalWeightedStake;
+    this.maxUnlockDurationInSlots = args.maxUnlockDurationInSlots;
+    this.minUnlockDurationInSlots = args.minUnlockDurationInSlots;
   }
 
   getAuthorityPubkey(): PublicKey {
@@ -94,7 +96,7 @@ export class YourPoolData {
   }
 }
 
-export const YOUR_POOL_STORAGE_TOTAL_BYTES = 1 + 1 + 32 + 32 + 4 + 8 + 8 + 8 + 8 + 8 + 8 + 8; // 126
+export const YOUR_POOL_STORAGE_TOTAL_BYTES = 1 + 1 + 32 + 32 + 4 + 8 + 8 + 8 + 8 + 8 + 8 + 8 + 8 + 8; // 142
 
 export const YOUR_POOL_DATA_ON_CHAIN_SCHEMA = new Map<any, any>([
   [
@@ -117,6 +119,9 @@ export const YOUR_POOL_DATA_ON_CHAIN_SCHEMA = new Map<any, any>([
         ['rewardPerSlot', 'u64'],
         ['maxRewardRate', 'u64'],
         ['minRewardRate', 'u64'],
+
+        ['maxUnlockDurationInSlots', 'u64'],
+        ['minUnlockDurationInSlots', 'u64'],
       ],
     },
   ],

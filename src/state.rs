@@ -8,7 +8,7 @@ pub enum AccTypesWithVersion {
 
 pub const REWARD_RATE_PRECISION: f64 = 1000000000.0;
 
-pub const YOUR_POOL_STORAGE_TOTAL_BYTES: usize = 126; // Should be 2 bytes less than real size of
+pub const YOUR_POOL_STORAGE_TOTAL_BYTES: usize = 142;
 #[derive(Clone, BorshDeserialize, BorshSerialize, Copy)]
 pub struct YourPool {
     pub acc_type: u8,
@@ -26,6 +26,8 @@ pub struct YourPool {
     pub rewards_per_slot: u64,
     pub max_reward_rate: u64,
     pub min_reward_rate: u64,
+    pub max_unlock_duration_in_slots: u64,
+    pub min_unlock_duration_in_slots: u64,
 }
 
 pub const USER_STORAGE_TOTAL_BYTES: usize = 114;
@@ -42,7 +44,7 @@ pub struct User {
 
     pub claim_timeout_slot: u64,
 
-    pub user_weighted_epoch: u64,
+    pub last_claim_epoch: u64,
     pub user_weighted_stake: f64,
     pub user_stake: u64,
 }

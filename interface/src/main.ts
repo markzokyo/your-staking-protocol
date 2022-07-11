@@ -1,8 +1,9 @@
 import { Keypair, PublicKey, sendAndConfirmTransaction } from '@solana/web3.js';
 import { readFileSync } from 'fs';
+import * as dotenv from 'dotenv';
 
 import { ConnectionService, SolanaNet } from '../src/config';
-import { createInitializePoolTransaction, createUpdateRatesTransaction } from './transactions';
+import { createInitializePoolTransaction, createUpdateRatesTransaction, changeUnlockDurationTransaction } from './transactions';
 import { Pubkeys, Constants } from './constants';
 import { YourPoolData, UserData } from './models';
 import { getUserStorageAccountWithNonce } from './utils';
@@ -45,13 +46,14 @@ export function getYourRewardsVault(): Keypair {
 
 const adminAccount: Keypair = getAdminAccount();
 
-const tokenAccont: Keypair = getTokenAccount();
+const tokenAccount: Keypair = getTokenAccount();
 
 const yourPoolStorageAccount: Keypair = getYourPoolStorageAccount();
 const yourStakingVault: Keypair = getYourStakingVault();
 const yourRewardsVault: Keypair = getYourRewardsVault();
 
-ConnectionService.setNet(SolanaNet.DEVNET);
+dotenv.config();
+ConnectionService.setNet(SolanaNet[process.env.SOLANA_NET as string]);
 const connection = ConnectionService.getConnection();
 
 let initialize_pool = async (epoch_duration_in_slots: number, reward_pool: number) => {
@@ -78,6 +80,11 @@ let change_rates = async (rewards_per_slot: number, max_reward_rate: number, min
   await sendAndConfirmTransaction(connection, createUpdateRatesTx, [adminAccount]);
 }
 
+let change_unlock_duration = async (max_lock_slots_in_decimals: number, min_lock_slots_in_decimals: number) => {
+  const createUpdateRatesTx = await changeUnlockDurationTransaction(adminAccount.publicKey, max_lock_slots_in_decimals, min_lock_slots_in_decimals);
+  await sendAndConfirmTransaction(connection, createUpdateRatesTx, [adminAccount]);
+}
+
 let get_pool_state = async (poolStorage: PublicKey) => {
   let yourPoolData = await YourPoolData.fromAccount(poolStorage);
   if (yourPoolData == null) {
@@ -98,10 +105,12 @@ let get_user_state = async (user: PublicKey) => {
 }
 
 if (require.main === module) {
+  console.log(process.env.SOLANA_NET);
+
   Pubkeys.yourStakingProgramId = getProgramAccount().publicKey;
-  Pubkeys.stakingMintPubkey = tokenAccont.publicKey;
-  Pubkeys.yourTokenMintPubkey = tokenAccont.publicKey;
-  Pubkeys.rewardsMintPubkey = tokenAccont.publicKey;
+  Pubkeys.stakingMintPubkey = tokenAccount.publicKey;
+  Pubkeys.yourTokenMintPubkey = tokenAccount.publicKey;
+  Pubkeys.rewardsMintPubkey = tokenAccount.publicKey;
   Pubkeys.yourPoolStoragePubkey = yourPoolStorageAccount.publicKey;
   Pubkeys.yourStakingVaultPubkey = yourStakingVault.publicKey;
   Pubkeys.yourRewardsVaultPubkey = yourRewardsVault.publicKey;
@@ -135,6 +144,21 @@ if (require.main === module) {
       change_rates(Number.parseInt(process.argv[3]), Number.parseInt(process.argv[4]), Number.parseInt(process.argv[5]))
         .then(
           _ => console.info("Successfully changed rates")
+        )
+        .catch(
+          reason => console.error(reason)
+        );
+
+      break;
+    }
+    case "change_unlock_duration": {
+      if (process.argv.length < 5) {
+        throw "signature mismatch; change_unlock_duration(max_lock_slots_in_decimals: number, min_lock_slots_in_decimals: number)";
+      }
+
+      change_unlock_duration(Number.parseInt(process.argv[3]), Number.parseInt(process.argv[4]))
+        .then(
+          _ => console.info("Successfully changed unlock duration")
         )
         .catch(
           reason => console.error(reason)

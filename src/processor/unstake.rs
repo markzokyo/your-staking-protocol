@@ -108,9 +108,18 @@ pub fn process_unstake(
     // user can withdraw tokens after beginning of the next epoch, so that pool total staked is not affected during current epoch
     let current_epoch = (Clock::get()?.slot - your_pool_data.pool_init_slot)
         / your_pool_data.epoch_duration_in_slots;
+
+    let unlock_duration = utils::min(
+        your_pool_data.max_unlock_duration_in_slots as f64,
+        utils::max(
+            your_pool_data.min_unlock_duration_in_slots as f64,
+            your_pool_data.epoch_duration_in_slots as f64 * amount_to_withdraw as f64
+                / user_storage_data.pending_unstake_amount as f64,
+        ),
+    ) as u64;
     user_storage_data.pending_unstake_slot = your_pool_data.pool_init_slot
-        + (current_epoch + 1) * your_pool_data.epoch_duration_in_slots
-        + 1;
+        + current_epoch * your_pool_data.epoch_duration_in_slots
+        + unlock_duration;
 
     user_data_byte_array[0usize..USER_STORAGE_TOTAL_BYTES]
         .copy_from_slice(&user_storage_data.try_to_vec().unwrap());
